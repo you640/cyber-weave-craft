@@ -6,7 +6,7 @@ const TermsPage = () => (
     metaDescription="Všeobecné obchodné podmienky poskytovania cybersecurity služieb. SLA, platby, zodpovednosť, ukončenie."
     marker={{ num: "LEGAL · TERMS", label: "Obchodné podmienky" }}
     title="Všeobecné obchodné podmienky"
-    intro="Tieto VOP upravujú vzťah medzi Nexify Studio s. r. o. (ďalej „poskytovateľ") a klientom pri poskytovaní cybersecurity služieb."
+    intro={'Tieto VOP upravujú vzťah medzi Nexify Studio s. r. o. (ďalej „poskytovateľ") a klientom pri poskytovaní cybersecurity služieb.'}
     updated="Verzia 3.0 · platné od 19. 4. 2026"
     sections={[
       {
