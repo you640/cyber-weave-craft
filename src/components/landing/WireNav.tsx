@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { UserMenu } from "@/components/auth/UserMenu";
 
 const landingLinks = [
   { label: "Strážna služba", href: "#strážna-služba" },
@@ -57,7 +58,7 @@ export const WireNav = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="hidden sm:block font-mono text-xs px-3 py-2 wire-border">Login</button>
+          <UserMenu />
           <Link
             to="/kontakt"
             className="font-mono text-xs px-3 py-2 bg-primary text-primary-foreground wire-shadow-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all"
