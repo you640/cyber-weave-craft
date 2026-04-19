@@ -87,6 +87,31 @@ const PrivacyPage = () => (
         ),
       },
       {
+        id: "externe-zdroje",
+        num: "5a",
+        title: "Externé zdroje vulnerability dát (NVD/NIST)",
+        body: (
+          <>
+            <p>
+              Spoločnosť využíva údaje z <strong>Národného registra zraniteľností (NVD)</strong>{" "}
+              spravovaného <strong>NIST</strong> na obohatenie našich bezpečnostných analýz a
+              hodnotení zraniteľností. Dáta z NVD slúžia ako autoritatívny zdroj informácií o
+              CVE, CVSS, CWE a CPE a sú používané na automatizáciu správy zraniteľností,
+              meranie bezpečnosti a súlad s normami.
+            </p>
+            <p>
+              Doplnkovo používame verejné referenčné zdroje{" "}
+              <strong>MITRE ATT&amp;CK</strong>, <strong>CISA KEV</strong> a{" "}
+              <strong>EPSS (FIRST.org)</strong>. Ide výhradne o <strong>verejné referenčné
+              dáta</strong> — pri dotazoch do týchto zdrojov{" "}
+              <strong>neprenášame žiadne osobné údaje klientov</strong> ani citlivé technické
+              dáta z prostredia klienta. Korelácia výsledkov prebieha lokálne v našej
+              infraštruktúre (EÚ).
+            </p>
+          </>
+        ),
+      },
+      {
         id: "prenosy",
         num: "6",
         title: "Prenosy mimo EÚ",

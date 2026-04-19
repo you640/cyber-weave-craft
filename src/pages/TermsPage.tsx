@@ -53,6 +53,10 @@ const TermsPage = () => (
             <li>Postupovať s odbornou starostlivosťou (industry best practices).</li>
             <li>Zachovávať mlčanlivosť o všetkých údajoch klienta.</li>
             <li>Bezodkladne informovať klienta o závažných nálezoch.</li>
+            <li>
+              Pri vulnerability assessmente využívať autoritatívne verejné zdroje (NVD/NIST,
+              MITRE ATT&amp;CK, CISA KEV, EPSS) v kombinácii s vlastnými metodikami.
+            </li>
           </ul>
         ),
       },

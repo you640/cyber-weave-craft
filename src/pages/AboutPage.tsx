@@ -74,8 +74,43 @@ const AboutPage = () => (
       </div>
     </section>
 
+    <section className="mb-16">
+      <SectionMarker num="METHOD · 03" label="Metodológia & zdroje dát" />
+      <div className="wire-border-solid p-6 md:p-8 wire-shadow-sm bg-background">
+        <h3 className="text-xl md:text-2xl font-bold tracking-tight mb-4">
+          Autoritatívne zdroje, opakovateľné výsledky
+        </h3>
+        <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4">
+          Pri mapovaní a hodnotení zraniteľností používame obohatené záznamy z{" "}
+          <strong className="text-foreground">NVD (NIST)</strong> — CVE list, CVSS skóre, CWE
+          kategórie a CPE aplikovateľnosť. Výsledky z NVD kombinujeme s{" "}
+          <strong className="text-foreground">MITRE ATT&CK</strong> (TTPs),{" "}
+          <strong className="text-foreground">CISA KEV</strong> (aktívne zneužívané CVE) a{" "}
+          <strong className="text-foreground">EPSS</strong> (pravdepodobnosť zneužitia).
+        </p>
+        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+          NVD používame ako referenčný zdroj na obohatenie a koreláciu — finálne hodnotenie
+          nikdy nevychádza výlučne z verejných databáz. Vždy ho kombinujeme s internými dátami,
+          lokálnou cache a manuálnym overením v kontexte konkrétneho prostredia klienta. Tým
+          dosahujeme spoľahlivé a opakovateľné vyhodnotenia.
+        </p>
+        <div className="flex flex-wrap gap-2 mt-5">
+          {["NVD / NIST", "MITRE ATT&CK", "CISA KEV", "EPSS / FIRST.org", "CVE · CVSS · CWE · CPE"].map(
+            (t) => (
+              <span
+                key={t}
+                className="font-mono text-[10px] tracking-[0.15em] uppercase px-2 py-1 wire-border bg-[hsl(var(--wire-bg-soft))]"
+              >
+                {t}
+              </span>
+            ),
+          )}
+        </div>
+      </div>
+    </section>
+
     <section className="mb-16 wire-border bg-[hsl(var(--wire-bg-soft))] p-8">
-      <SectionMarker num="NUMBERS · 03" label="V číslach" />
+      <SectionMarker num="NUMBERS · 04" label="V číslach" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {stats.map((s) => (
           <div key={s.label}>
