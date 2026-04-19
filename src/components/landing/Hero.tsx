@@ -1,5 +1,8 @@
-import { PlaceholderBox } from "./PlaceholderBox";
 import { WireAnnotation, WireArrow } from "./WireAnnotation";
+import dashboardImg from "@/assets/dashboard.png";
+import logsImg from "@/assets/logs.png";
+import alertsImg from "@/assets/alerts.png";
+import reportImg from "@/assets/report.png";
 
 const stats = [
   { label: "Dohľad", val: "24/7", sub: "365 dní v roku" },
@@ -68,16 +71,37 @@ export const Hero = () => (
           <div className="absolute -top-3 -left-3 z-10 wire-border-solid bg-background px-2 py-0.5 font-mono text-[10px] tracking-wider">
             FIG_01 · dashboard.png
           </div>
-          <PlaceholderBox label="dashboard preview" ratio="aspect-[5/4]" />
+          <div className="wire-border bg-background overflow-hidden aspect-[5/4]">
+            <img
+              src={dashboardImg}
+              alt="Wireframe náhľad bezpečnostného dashboardu Nexify Guard so štatistikami útokov"
+              width={1280}
+              height={1024}
+              className="w-full h-full object-cover"
+            />
+          </div>
           <div className="absolute -right-2 top-1/3 hidden lg:flex items-center">
             <WireAnnotation rotate={8} className="text-xl">live SIEM ↑</WireAnnotation>
           </div>
         </div>
 
         <div className="mt-3 grid grid-cols-3 gap-2">
-          <PlaceholderBox label="logs" ratio="aspect-square" showCross={false} />
-          <PlaceholderBox label="alerts" ratio="aspect-square" showCross={false} />
-          <PlaceholderBox label="report" ratio="aspect-square" showCross={false} />
+          {[
+            { src: logsImg, alt: "Wireframe náhľad log forensics tabuľky" },
+            { src: alertsImg, alt: "Wireframe náhľad incident kanban boardu" },
+            { src: reportImg, alt: "Wireframe náhľad PDF audit reportu" },
+          ].map((img) => (
+            <div key={img.alt} className="wire-border bg-background overflow-hidden aspect-square">
+              <img
+                src={img.src}
+                alt={img.alt}
+                width={1024}
+                height={1024}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>
