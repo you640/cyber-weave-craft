@@ -2,28 +2,28 @@ import { PlaceholderBox } from "./PlaceholderBox";
 import { WireAnnotation, WireArrow } from "./WireAnnotation";
 
 const stats = [
-  { label: "Detekčné pokrytie", val: "200+", sub: "CVE & exploit patterns" },
-  { label: "Reakčný čas", val: "< 4h", sub: "incident response" },
-  { label: "Audit reporty", val: "PDF", sub: "+ nginx/WAF konfig" },
-  { label: "GDPR / NIS2", val: "✓", sub: "SK 18/2018 + EU" },
+  { label: "Dohľad", val: "24/7", sub: "365 dní v roku" },
+  { label: "Reakčný čas", val: "< 4h", sub: "aj cez víkendy" },
+  { label: "V službe", val: "365", sub: "dní bez prestávky" },
+  { label: "Víkendy", val: "0×", sub: "zatvorené nikdy" },
 ];
 
 export const Hero = () => (
   <header className="mt-12 md:mt-16">
     <div className="inline-flex items-center gap-2 wire-border px-3 py-1.5 mb-8">
       <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-      <span className="font-mono text-[10px] tracking-[0.2em] uppercase">Cenník 2026 · SK / CZ trh</span>
+      <span className="font-mono text-[10px] tracking-[0.2em] uppercase">24/7 strážna služba · SK / CZ · 2026</span>
     </div>
 
     <div className="grid lg:grid-cols-12 gap-10 items-start">
       <div className="lg:col-span-7">
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[0.95] tracking-tight">
-          Kybernetická
+          Strážna služba
           <br />
-          bezpečnosť
+          pre váš web.
           <br />
           <span className="relative inline-block">
-            <span className="italic font-light text-primary">bez kompromisov</span>
+            <span className="italic font-light text-primary">Kým spíte, my strážime.</span>
             <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 300 8" preserveAspectRatio="none">
               <path d="M2 5 Q 75 1, 150 4 T 298 3" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" strokeLinecap="round" />
             </svg>
@@ -32,8 +32,10 @@ export const Hero = () => (
 
         <div className="relative mt-8 max-w-xl">
           <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-            Kompletný katalóg služieb ochrany webových aplikácií, serverov a SaaS produktov pre slovenský a český trh.{" "}
-            <span className="text-foreground font-medium">Fixné ceny, žiadne skryté poplatky</span>, každý výstup ako auditný report s konkrétnymi krokmi.
+            Sledujeme váš eshop, web alebo aplikáciu <span className="text-foreground font-medium">24 hodín denne, 7 dní v týždni</span>. Keď niekto skúša prelomiť dvere, vieme o tom skôr než vy. Keď padne server o 3:00 ráno, dvíhame telefón my.
+          </p>
+          <p className="mt-3 font-mono text-xs text-muted-foreground tracking-wider">
+            // chránime eshopy s obratom od 10 000 € po 5 000 000 € ročne
           </p>
         </div>
 

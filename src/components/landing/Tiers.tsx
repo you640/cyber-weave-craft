@@ -4,55 +4,58 @@ import { cn } from "@/lib/utils";
 const tiers = [
   {
     code: "T_01",
-    name: "Essentials",
+    name: "Strážny",
     target: "SME / živnostníci / malé weby",
     price: "249",
     note: "jednorazovo · bez DPH",
-    cta: "Objednať audit",
+    cta: "Objednať Strážneho",
+    promise: "Spíte pokojne, lebo váš web má základnú ochranu pred 90 % bežných útokov.",
     features: [
-      "Security audit logov — 7 dní nginx/Apache",
-      "WordPress hardening basic (xmlrpc, wp-login)",
-      "TLS/SSL check — HSTS, TLS 1.3",
-      "PDF report — 10–15 strán",
-      "Implementačný návod (nginx snippety)",
-      "E-mailová podpora 7 dní",
+      "Audit prístupových logov za posledných 7 dní",
+      "Hardening WordPressu (heslá, prihlasovanie, xmlrpc)",
+      "Kontrola HTTPS / SSL certifikátu",
+      "PDF report — 10 až 15 strán, ľudskou rečou",
+      "Implementačný návod krok po kroku",
+      "E-mailová podpora 7 dní po dodaní",
     ],
   },
   {
     code: "T_02",
-    name: "Professional",
-    target: "Firmy 10–50 / SaaS / e-shopy",
+    name: "Ochranca",
+    target: "Firmy 10–50 / SaaS / eshopy",
     price: "1 290",
     note: "jednorazovo · bez DPH",
-    cta: "Objednať Professional",
+    cta: "Objednať Ochrancu",
     popular: true,
+    promise: "Šetríte 5 000 – 50 000 € ročne na možných výpadkoch a incidentoch.",
     features: [
-      "Všetko z balíka Essentials",
-      "Pentest aplikácie — OWASP Top 10",
-      "Server hardening (SSH, fw, fail2ban)",
-      "WAF deployment (Cloudflare / ModSec)",
-      "Monitoring setup (Grafana + Loki)",
-      "GDPR audit — cookies, retention, DPA",
-      "Incident response plan + runbook",
-      "30 dní support + 1 konzultácia",
+      "Všetko z balíka Strážny",
+      "Pentest aplikácie — top 10 najčastejších útokov",
+      "Hardening servera (SSH, firewall, fail2ban)",
+      "Nasadenie ochranného múru (Cloudflare / ModSec)",
+      "Monitoring v reálnom čase (grafy + alerty)",
+      "GDPR audit — cookies, retencia, DPA zmluvy",
+      "Plán čo robiť pri incidente (runbook)",
+      "30 dní podpory + 1 hodina konzultácie",
     ],
   },
   {
     code: "T_03",
-    name: "Shield",
+    name: "Telochranca",
     target: "Agentúry / SaaS >10k / fintech",
     price: "3 890",
-    note: "jednorazovo + retainer · bez DPH",
-    cta: "Objednať Shield",
+    note: "jednorazovo + mesačný paušál · bez DPH",
+    cta: "Objednať Telochrancu",
+    promise: "Vyhnete sa nočnej more typu „padol nám eshop v Čierny piatok“.",
     features: [
-      "Všetko z balíka Professional",
-      "Hĺbkový pentest — black/grey box, API fuzz",
-      "DevSecOps — Supabase RLS, JWT, secrets",
-      "Infra audit — AWS/Vercel, IAM, network",
-      "Source code review (SAST + manual)",
-      "NIS2 / ISO 27001 alignment",
-      "24/7 incident response SLA (retainer)",
-      "90 dní support + mesačný sync",
+      "Všetko z balíka Ochranca",
+      "Hĺbkový pentest — black/grey box, API útoky",
+      "DevSecOps — databáza, tokeny, tajné kľúče",
+      "Audit infraštruktúry (AWS / Vercel, prístupy)",
+      "Revízia zdrojového kódu (automaticky + ručne)",
+      "Príprava na NIS2 / ISO 27001",
+      "24/7 incident response so zmluvnou SLA",
+      "90 dní podpory + mesačný sync hovor",
     ],
   },
 ];
@@ -108,6 +111,10 @@ export const Tiers = () => (
             </div>
             <div className="font-mono text-[11px] text-muted-foreground mt-1">{t.note}</div>
           </div>
+
+          <p className="mt-5 text-sm leading-snug text-foreground/80 italic">
+            „{t.promise}“
+          </p>
 
           <ul className="mt-5 space-y-2.5 flex-1">
             {t.features.map((f) => (
