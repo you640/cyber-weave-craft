@@ -1,92 +1,82 @@
 
 
-User chce prerobiť `GuardStatusBar` z jednoduchého status pásika na **plnohodnotnú "cyber attack map" sekciu** s live counter, animovanými číslami, log streamom a vizuálnou mapou útokov. Stále v wireframe estetike (biele BG, mono, dashed borders, blue akcent).
+User chce pridať social sign-in (Google, Apple, Microsoft, GitHub). Potrebujem skontrolovať čo Lovable Cloud podporuje natívne:
 
-## Plán: Cyber Attack Map nad footerom
+- **Google** ✅ natívne podporovaný
+- **Apple** ✅ natívne podporovaný
+- **Microsoft** ❌ nie je v zozname natívne podporovaných (Email, Phone, Google, Apple, SSO/SAML)
+- **GitHub** ❌ nie je natívne podporovaný v Lovable Cloud
 
-Premenujem `GuardStatusBar.tsx` na **`AttackMap.tsx`** (nový komponent, väčšia plocha) a starý status bar nechám ako tenký pásik priamo nad footerom.
+Aktuálne v projekte **neexistuje žiadny auth flow** — žiadny `/auth` route, žiadne login/signup formuláre, žiadne profily, žiadny chránený obsah. WireNav má len mock "Login" tlačidlo bez funkcie. Treba postaviť auth od nuly.
 
-### Layout — 2 vrstvy
+Tiež sa potrebujem opýtať na profily a use case predtým ako začnem stavať.
 
-**Vrstva 1: `AttackMap.tsx`** — veľká sekcia (cca 500px výška)  
-Marker: `// LIVE · 09 · CYBER OPERATIONS CENTER`  
-Nadpis: "Live mapa útokov · práve teraz"
+## Plán: Pridať social sign-in (Google + Apple)
 
-3-stĺpcový grid (12-col):
-- **Ľavý panel (3 cols)** — Counter stack:
-  - Veľký animovaný counter "ÚTOKOV ZABLOKOVANÝCH DNES" — 5-miestne číslo, mono, ~6xl, tikajúce nahor
-  - Pod tým 4 menšie countery: "Brute-force", "DDoS", "SQL inject", "Bot scrapery" — každý so svojou rastúcou hodnotou
-  - Sparkline mini-graf "posledných 60 minút"
-  
-- **Stredný panel (5 cols)** — ASCII/SVG world map:
-  - Wireframe outline svetadielov (jednoduchý SVG path, nie real mapa)
-  - Animované "ping" bodky na náhodných koordinátoch (Brazília, Rusko, Čína, Nigéria, USA, Vietnam) — pulse animácia v primary blue
-  - Každé X sekúnd nový ping s textom typu `[ATTACK] 185.220.x.x → BLOCKED`
-  - Legend dole: typy útokov + ich farby (všetky v blue škále)
+### Realita: čo sa dá a čo nie
 
-- **Pravý panel (4 cols)** — Live log stream:
-  - Mono terminál vibe — tmavší soft bg
-  - Auto-scrolling list ~10 riadkov, nové sa pridávajú zhora
-  - Format: `[14:23:07] BLOCK · 91.92.x.x · brute-force · /wp-admin`
-  - Status farby: BLOCK (blue), ALERT (orange-handwritten), OK (muted)
-  - Header: `tail -f /var/log/nexify-guard.log` + blinking cursor
+Lovable Cloud natívne podporuje len **Google + Apple** (+ Email/Phone/SAML). 
+**Microsoft a GitHub nie sú podporované** — pridanie by vyžadovalo rozpojiť Lovable Cloud a pripojiť externý Supabase projekt, čo zničí súčasné nastavenie. Odporúčam ich vynechať a ísť s Google + Apple, prípadne doplniť email/heslo ako fallback.
 
-**Vrstva 2: `GuardStatusBar.tsx`** — zostane ako tenký pásik (existujúci) hneď pod AttackMap, doplním tam aj malý "active threats: N" counter.
+### Otvorené otázky pred implementáciou
 
-### Animácia counterov
-- Custom `useCounter` hook v `src/hooks/use-counter.ts`:
-  - Štartuje z deterministickej hodnoty na základe času od polnoci (aby každý reload nezačal od 0)
-  - Inkrement každých 800-3000ms o 1-7 (random jitter)
-  - Smooth count-up cez `requestAnimationFrame` (200ms tween na každý nový target)
-- Sub-countery sú deriváty hlavného (cca 45% / 25% / 18% / 12% split)
+Potrebujem od teba 2-3 rozhodnutia (pýtam sa nižšie cez kartičky), ale toto je smerový plán.
 
-### Live log generator
-- `src/lib/attack-log.ts`:
-  - Pole IP prefixov, attack typov, target paths, krajín
-  - Funkcia `generateLogEntry()` → vracia `{ timestamp, ip, country, type, target, action }`
-  - V komponente `setInterval(800-2500ms)` pridá nový log, drží max 12 v stave
-- Použijem `flushSync` ne, len obyčajný state — nemusí byť blazing fast
+### Čo postavím
 
-### Mapa — implementácia
-- Inline SVG s wireframe outline kontinentov (zjednodušená geometria, ~6-8 path-ov)
-- Ping bodky: pole fixných lat/lon → SVG x/y koordinátov
-- Každý ping má entry animáciu (scale-in + fade) a po 4s sa resetuje
-- Nový ping každé 1.5-3s, max 5 aktívnych naraz
-- Pri každom ping-u tiež bliká ASCII text `>>> [event] <<<` v rohu mapy
+**1. Auth infrastructure (Lovable Cloud)**
+- Cez "Configure Social Login" tool aktivujem Google + Apple cez `lovable.auth.signInWithOAuth()`
+- Vygeneruje sa `src/integrations/lovable/` modul (managed OAuth, žiadne kľúče netreba)
 
-### Vizuálne detaily (v štýle landing page)
-- Container: `wire-border bg-background` s `wire-shadow`
-- Mono labely všade `font-mono text-[10px] tracking-[0.2em] uppercase`
-- Hlavný counter: žltý `wire-handwritten` accent stamp "↑ live" v pravom hornom rohu
-- Decoratívne: `FIG_09 · live-feed.svg` stamp v rohu (ako u Hero obrázkov)
-- Žiadne nové farby — len existujúce `--primary`, `--wire-*`, `--muted-foreground`
+**2. Nová stránka `/auth`**
+- Wireframe štýl 1:1 s zvyškom stránky (`wire-border`, mono labely, dashed dividery, blue akcent)
+- Marker `// ACCESS · 10`
+- 2-stĺpcový layout:
+  - **Ľavý panel:** value-prop copy ("prihlás sa do dispečingu", live counter mini-widget, čo dostaneš po prihlásení)
+  - **Pravý panel:** auth karta s tlačidlami:
+    - `[ Pokračovať cez Google → ]`
+    - `[ Pokračovať cez Apple → ]`
+    - dashed divider "alebo"
+    - email + heslo formulár (sign-in / sign-up tab toggle)
+- Po úspechu: redirect na `/` (alebo `/dashboard` ak ho neskôr postavíme)
 
-### Nový/upravený obsah
+**3. Auth state management**
+- Hook `useAuth()` v `src/hooks/use-auth.ts`:
+  - `onAuthStateChange` listener (nastavený PRED `getSession()`)
+  - vracia `{ user, session, loading, signOut }`
+- React Context `AuthProvider` v `App.tsx` aby celá appka videla session
 
-**Nové súbory:**
-- `src/components/landing/AttackMap.tsx` — hlavná sekcia
-- `src/components/landing/AttackMap/WorldMap.tsx` — SVG mapa s pingmi
-- `src/components/landing/AttackMap/LiveLog.tsx` — log stream panel
-- `src/components/landing/AttackMap/CounterStack.tsx` — countery panel
-- `src/hooks/use-counter.ts` — animated count-up hook
-- `src/lib/attack-log.ts` — log generator + konštanty (IP, krajiny, typy)
+**4. Aktualizácia `WireNav.tsx`**
+- Mock "Login" tlačidlo → reálny `<Link to="/auth">Login</Link>`
+- Keď je user prihlásený: zobraziť `[ user@email.com ▾ ]` dropdown s "Odhlásiť sa"
+- Mobilná verzia rovnako
 
-**Upravené súbory:**
-- `src/pages/Index.tsx` — vložiť `<AttackMap />` medzi `<FAQ />` a `<GuardStatusBar />`
-- `src/components/landing/GuardStatusBar.tsx` — pridať mini "active threats: N" counter (aby súvisel s AttackMap)
+**5. Profile table (ak povieš áno na otázku #1)**
+- Migrácia: `profiles` tabuľka s `id` (FK na `auth.users`), `display_name`, `avatar_url`, `created_at`, `updated_at`
+- RLS: user vidí/upravuje len svoj profil
+- Trigger: auto-create profil pri signup z `raw_user_meta_data`
 
-### Performance & cleanup
-- Všetky `setInterval` v `useEffect` s cleanup
-- `requestAnimationFrame` v counter hooku tiež cleanup
-- Nepoužívam externé knižnice — všetko inline SVG + state
+### Súbory
 
-### Tone copy (slovenčina, po lopate)
-- "Útokov zablokovaných dnes" (nie "blocked attacks today")
-- "Práve teraz" / "Posledných 60 minút"
-- Log akcie v EN (autenticky terminál vibe): `BLOCK`, `ALERT`, `MITIGATE`, `ALLOW`
-- Krajiny v SK: "Rusko", "Čína", "Nigéria", "USA", "Brazília", "Vietnam", "Irán"
+**Nové:**
+- `src/pages/AuthPage.tsx`
+- `src/hooks/use-auth.ts`
+- `src/components/auth/AuthProvider.tsx`
+- `src/components/auth/UserMenu.tsx`
+- (auto) `src/integrations/lovable/index.ts`
 
-### Mobil
-- Na <md: stack 1 stĺpec (countery → mapa → log)
-- Mapa drží svoj aspect ratio, log stream skrátim na 6 riadkov
+**Upravené:**
+- `src/App.tsx` — `/auth` route + `<AuthProvider>` wrap
+- `src/components/landing/WireNav.tsx` — Login link + UserMenu
+- (možno) migrácia pre `profiles` tabuľku
+
+### Vizuál
+Žiadne nové farby/fonty. Len existujúce wireframe utility. Tlačidlá majú `wire-shadow-sm`, hover micro-shift, mono labely. Apple tlačidlo čierne (foreground bg), Google biele (border), email accent primary.
+
+### Otázky k vyjasneniu
+
+Hneď ti pošlem 3 kartičky — bez tvojich odpovedí by som hádal:
+1. Či vôbec robiť Microsoft/GitHub (vyžaduje rozpojenie Cloud)
+2. Či potrebuješ user profily (display name, avatar) alebo stačí `auth.users`
+3. Či pridať aj email + heslo formulár, alebo len social
 
