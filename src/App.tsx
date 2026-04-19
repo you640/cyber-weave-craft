@@ -13,6 +13,8 @@ import PrivacyPage from "./pages/PrivacyPage.tsx";
 import DpaPage from "./pages/DpaPage.tsx";
 import TermsPage from "./pages/TermsPage.tsx";
 import CookiesPage from "./pages/CookiesPage.tsx";
+import AuthPage from "./pages/AuthPage.tsx";
+import { AuthProvider } from "./components/auth/AuthProvider";
 
 const queryClient = new QueryClient();
 
@@ -22,19 +24,22 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/o-nas" element={<AboutPage />} />
-          <Route path="/case-studies" element={<CaseStudiesPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/kontakt" element={<ContactPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/dpa" element={<DpaPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/cookies" element={<CookiesPage />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/o-nas" element={<AboutPage />} />
+            <Route path="/case-studies" element={<CaseStudiesPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/kontakt" element={<ContactPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/dpa" element={<DpaPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/cookies" element={<CookiesPage />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
