@@ -2,3 +2,6 @@ project_id = "buzxlzteazsdltzboprp"
 
 [functions.attack-stream]
 verify_jwt = false
+
+[functions.mcp-call]
+verify_jwt = false

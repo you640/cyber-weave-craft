@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Route, Routes, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/dashboard/AdminSidebar";
 import { Overview } from "@/components/dashboard/panels/Overview";
+import { McpPanel } from "@/components/dashboard/panels/McpPanel";
 import { UserMenu } from "@/components/auth/UserMenu";
 
 const Dashboard = () => {
@@ -30,7 +31,11 @@ const Dashboard = () => {
           </header>
 
           <main className="flex-1 px-4 md:px-8 py-8 max-w-6xl w-full">
-            <Overview />
+            <Routes>
+              <Route index element={<Overview />} />
+              <Route path="mcp" element={<McpPanel />} />
+              <Route path="*" element={<Navigate to="." replace />} />
+            </Routes>
           </main>
         </div>
       </div>
