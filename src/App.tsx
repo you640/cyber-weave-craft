@@ -31,7 +31,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route
-              path="/dashboard"
+              path="/dashboard/*"
               element={
                 <AdminRoute>
                   <Dashboard />
