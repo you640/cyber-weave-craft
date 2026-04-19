@@ -9,9 +9,15 @@ export const WireNav = () => (
       </div>
 
       <div className="hidden md:flex items-center gap-1 font-mono text-xs">
-        {["Balíčky", "Služby", "Doplnky", "Retainery", "FAQ"].map((l) => (
-          <a key={l} href={`#${l.toLowerCase()}`} className="px-3 py-2 border border-transparent hover:border-dashed hover:border-foreground transition-colors">
-            {l}
+        {[
+          { label: "Strážna služba", href: "#strážna-služba" },
+          { label: "Balíčky", href: "#balíčky" },
+          { label: "Hrozby", href: "#hrozby" },
+          { label: "Príbehy", href: "#príbehy" },
+          { label: "FAQ", href: "#faq" },
+        ].map((l) => (
+          <a key={l.label} href={l.href} className="px-3 py-2 border border-transparent hover:border-dashed hover:border-foreground transition-colors">
+            {l.label}
           </a>
         ))}
       </div>

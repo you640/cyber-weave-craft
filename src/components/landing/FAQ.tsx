@@ -26,6 +26,22 @@ const faqs = [
     q: "Pracujete aj so zahraničnými klientmi?",
     a: "Áno, pracujeme v SK, CZ a EN. Faktúry vieme vystaviť v EUR aj s reverse-charge mechanizmom pre EÚ firmy. Pri US/UK klientoch individuálna dohoda.",
   },
+  {
+    q: "Čo presne robíte cez víkendy a sviatky?",
+    a: "To isté čo cez týždeň. Naše monitoringy bežia nonstop a inžinier v službe má zapnutý telefón aj na Štedrý večer. Pri Ochranca a Telochranca balíčkoch máte garantovanú reakciu do 4, resp. 1 hodiny — bez ohľadu na deň, čas alebo to, či je 31. december.",
+  },
+  {
+    q: "Môj eshop je malý — oplatí sa mi to?",
+    a: "Práve malé eshopy sú najčastejším cieľom, lebo útočníci vedia, že nemajú IT oddelenie. Balík Strážny (249 €) zachytí 90 % útokov, ktoré dnes na malé weby reálne lietajú. Ak vám eshop generuje viac ako 1 000 € mesačne, jeden hacknutý víkend stojí viac než ročná ochrana.",
+  },
+  {
+    q: "Koľko ma bude stáť hacknutý web vs. vaša služba?",
+    a: "Priemerný incident pri eshope (čistenie, obnova zo záloh, pokuta GDPR, strata reputácie, výpadok predaja) stojí 8 000 – 50 000 €. Naša ročná strážna služba začína od 1 200 €. Matematika je jednoduchá — radšej zaplatíte ochrancu než opravára.",
+  },
+  {
+    q: "Aký je rozdiel medzi vami a hostingom (napr. Websupport)?",
+    a: "Hosting vám prenajíma server a stará sa, aby bežal. My sa staráme, aby na ňom nikto nerobil neporiadok. Hosting vás upozorní, keď server padne. My vás upozorníme, keď sa o to niekto pokúša — a útok zastavíme skôr, než sa dotkne hostingu.",
+  },
 ];
 
 export const FAQ = () => (
