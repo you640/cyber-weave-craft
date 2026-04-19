@@ -1,124 +1,128 @@
 
 
-Pridám na landing page koncept **24/7 strážnej služby pre eshopy, weby a aplikácie** — ako ústrednú narratívnu os celej stránky, nielen ako sekciu navyše. Rozumiem to ako "SBS pre tvoj web" — ľudská metafora, ktorú pochopí každý majiteľ eshopu, nielen IT.
+User wants me to create standalone pages/sections for footer links that currently point to `#` (dead links). Need to decide: separate routes vs in-page sections.
 
-## Slogan & koncept
+Looking at footer in `WireFooter.tsx`:
+- **Služby**: Audit logov, WP hardening, Pentest, WAF setup → these are already in `Services.tsx` table on landing
+- **Spoločnosť**: O nás, Case studies, Blog, Kontakt → mostly missing
+- **Legal**: Privacy, DPA, Terms, Cookies → missing
 
-**Hlavný slogan (kandidáti — vyberiem #1, ostatné ako podporné):**
-1. **"Strážna služba pre váš web. 24 hodín denne, 7 dní v týždni."**
-2. "Kým spíte, my strážime." 
-3. "Bezpečnostná agentúra pre eshopy a aplikácie."
+Best approach: separate routes (real pages) for legal + company pages. Služby links → anchor scroll to existing Services section + service detail modals would be overkill, just deep-link to `/sluzby/audit-logov` style or anchor. Simplest: anchor to `#služby` for Služby column (already exists), real routes for the rest.
 
-**Tagline pod hlavičkou:**  
-"To, čo SBS robí pre kamenný obchod, my robíme pre ten online — len rýchlejšie a bez uniformy."
+## Plán: Doplniť plnohodnotné stránky pre footer odkazy
 
-## Štrukturálne zmeny
+Vytvorím **8 nových stránok** ako samostatné routes + zachovám wireframe estetiku (biele BG, mono fonty, dashed borders, blue akcent). Každá stránka bude mať `WireNav` hore, `WireFooter` dole a obsah zarovnaný do `max-w-7xl` containeru.
 
-### 1. Hero — prepísať
-- H1: **"Strážna služba pre váš web"** (s "bez kompromisov" ako kurzíva podtitulok)
-- Lede: vysvetliť po lopate — "Sledujeme váš eshop, web alebo aplikáciu 24/7. Keď niekto skúša prelomiť dvere, vieme o tom skôr než vy. Keď padne server o 3:00 ráno, dvíhame telefón my."
-- 4-stat grid prepísať na ľudskú reč: "24/7 dohľad", "< 4h reakcia", "365 dní v roku", "Žiadne víkendy"
-- Pridať dôveryhodnostný riadok: "Chránime eshopy s obratom od 10k€ po 5M€ ročne"
+### Nové routes v `App.tsx`
 
-### 2. Nová sekcia "GUARD" (medzi Hero a Tiers) — hlavná hviezda
-**Marker:** `// 01 · NONSTOP DOHĽAD`  
-**Nadpis:** "Ako vyzerá strážna služba pre digitálny biznis"
+```
+/o-nas              → AboutPage.tsx
+/case-studies       → CaseStudiesPage.tsx
+/blog               → BlogPage.tsx
+/kontakt            → ContactPage.tsx
+/privacy            → PrivacyPage.tsx
+/dpa                → DpaPage.tsx
+/terms              → TermsPage.tsx
+/cookies            → CookiesPage.tsx
+```
 
-**Obsah (4 stĺpce s ikonami + ľudský popis):**
+### Footer Služby stĺpec → anchor scroll
+Linky `Audit logov`, `WP hardening`, `Pentest`, `WAF setup` upravím tak, aby skrolovali na `#služby` sekciu na landingu (existuje v `Services.tsx`). Nepotrebujú samostatné stránky — už majú detail v Services tabuľke.
 
-| Ikona | Nadpis | Po lopate |
-|---|---|---|
-| 👁 EYE | **Pozeráme sa stále** | "24 hodín denne sledujeme prístupy na váš web. Vidíme každú podozrivú IP adresu, každý pokus o heslo, každú chybu servera." |
-| 🚨 ALERT | **Alarmujeme okamžite** | "Keď sa niečo deje — útok, výpadok, podozrivá aktivita — dostanete notifikáciu na telefón do 60 sekúnd. Nie ráno. Hneď." |
-| 🛡 BLOCK | **Blokujeme útoky** | "Botnety, brute-force, scrapery, DDoS — všetko zastavíme automaticky. Vy len vidíte, koľko útokov sme za týždeň odrazili." |
-| 🚑 RESCUE | **Zachraňujeme keď treba** | "Hacknutý web? Vymazaná databáza? Volajte hocikedy. Sme na drôte do 4 hodín, aj cez víkend, aj na Vianoce." |
+### Obsah stránok (každá ~ wireframe layout s `SectionMarker`)
 
-**Pod tým "Pre koho je to":**
-- Eshopy (Shopify, WooCommerce, vlastné riešenia)
-- Firemné weby s formulármi a citlivými dátami  
-- SaaS aplikácie a API
-- Booking / rezervačné systémy
-- Akýkoľvek web kde výpadok = strata peňazí
+**1. `/o-nas` — O nás**
+- Marker `// COMPANY · 01`
+- H1: "Nezávislý cybersec butik z Bratislavy"
+- 3-stĺpcový text: príbeh, misia, prístup
+- Tím sekcia: 3 placeholder karty (founder, security engineer, devops)
+- Stat row: roky skúseností, počet auditov, klientov
 
-### 3. Banner pásik (pred Tiers)
-Tmavý/blue stripe cez celú šírku:  
-**"⚠ Každých 39 sekúnd je niekde na svete hacknutý jeden web. Váš nemusí byť ďalší."**  
-+ small CTA: `[ Spustiť dohľad → ]`
+**2. `/case-studies` — Case studies**
+- Marker `// PROOF · 02`
+- 6 wireframe kariet: anonymizované klienty (eshop kozmetika, B2B SaaS, booking, médiá, fintech, healthcare)
+- Každá karta: industry tag, problém, riešenie, metric (např. "−97% brute-force pokusov za 30d")
+- Filter chips hore: `[všetky] [eshop] [SaaS] [korporát]`
 
-### 4. Tiers — premenovať a doplniť
-Premenovať balíčky tak aby evokovali strážnu službu:
-- **STRAŽNÝ** (basic dohľad)
-- **OCHRANCA** (mid + WAF + incident response)  
-- **TELOCHRANCA** (full enterprise + dedicated engineer)
+**3. `/blog` — Blog**
+- Marker `// JOURNAL · 03`
+- 6 placeholder článkov v 2-stĺpcovom layoute
+- Každý: dátum, kategória tag, H3 titulok, lead paragraf, "čítať →"
+- Témy: WordPress CVE, NIS2 prehľad, post-mortem incidentu, GDPR FAQ, Cloudflare WAF, RLS Supabase
+- Sidebar: kategórie, tag cloud (mono štýl)
 
-Každá karta dostane do popisu odpoveď "čo to znamená pre váš biznis":
-- "Spíte pokojne, lebo…"
-- "Šetríte XY€ ročne na…"
-- "Vyhnete sa…"
+**4. `/kontakt` — Kontakt**
+- Marker `// CONTACT · 04`
+- 2-stĺpcový layout: ľavá info (email, telefón 24/7 incident line, adresa, IČO/DIČ), pravá wireframe form (meno, email, typ požiadavky select, správa, submit)
+- Pásik: "🚨 Incident? Volajte priamo: +421 XXX XXX XXX (24/7)"
+- Form je vizuálny mock, submit zobrazí `toast` "Ďakujeme, ozveme sa do 24h"
 
-### 5. Nová sekcia "Čo presne strážime" (po Services)
-**Marker:** `// 04 · SLEDOVANÉ HROZBY`  
-Wireframe 2-stĺpcová "checklist" tabuľka — ľudskou rečou:
+**5. `/privacy` — Privacy Policy**
+- Marker `// LEGAL · PRIVACY`
+- Plnohodnotný GDPR-compliant text v slovenčine: prevádzkovateľ, účely spracovania, právne základy, doby uchovávania, práva dotknutých osôb, kontakt na DPO
+- Štruktúrované do nadpisov H2/H3 s číslovanými sekciami (1., 1.1, 1.2…)
+- Posledná aktualizácia: "platné od 19. 4. 2026"
 
-**Útoky, ktoré chytáme:**
-- Niekto skúša uhádnuť heslo do administrácie (brute-force)
-- Boti scrapujú vaše ceny pre konkurenciu
-- Falošné objednávky z odcudzených kariet (carding)
-- DDoS — niekto chce váš eshop "zhodiť" v čiernom piatok
-- SQL injection — pokusy ukradnúť databázu zákazníkov
-- Malware nahrávaný cez kontaktný formulár
-- Pokusy o prevzatie účtov zákazníkov (credential stuffing)
+**6. `/dpa` — Data Processing Agreement**
+- Marker `// LEGAL · DPA`
+- Šablóna zmluvy o spracovaní osobných údajov medzi prevádzkovateľom (klient) a sprostredkovateľom (Nexify)
+- Sekcie: predmet, povinnosti sprostredkovateľa, sub-processors zoznam, technické a organizačné opatrenia, audit rights, ukončenie
+- Download CTA mock: `[ Stiahnuť PDF verziu → ]`
 
-**Problémy, ktoré riešime preventívne:**
-- Zastarané pluginy s bezpečnostnými dierami
-- Nesprávne nastavené zálohy (alebo žiadne)
-- Otvorené porty na servery
-- Heslá zamestnancov v DB v čistom texte
-- Chýbajúce HTTPS / zlý SSL setup
-- Neexistujúci incident response plán
+**7. `/terms` — Terms of Service**
+- Marker `// LEGAL · TERMS`
+- Obchodné podmienky: definície, predmet služby, povinnosti zmluvných strán, cena a platba, SLA (incident response časy), zodpovednosť za škodu, ukončenie, rozhodné právo SK
+- 12+ číslovaných sekcií
 
-### 6. Nová sekcia "Príbeh z praxe" (pred FAQ)
-3 krátke "case-like" príbehy bez mien klientov, ľudskou rečou:
+**8. `/cookies` — Cookie Policy**
+- Marker `// LEGAL · COOKIES`
+- Zoznam cookies v wireframe tabuľke: názov, účel, doba platnosti, typ (nutné/analytické/marketing)
+- Vysvetlenie ako spravovať cookies v prehliadači
+- Tlačidlo `[ Spravovať preferencie ]` (mock)
 
-> **"Eshop s kozmetikou, piatok 23:47"**  
-> "Botnet zo 4000 IP adries skúšal prelomiť admin účet. Naše alarmy zacvičili o 23:48. O 23:51 boli všetky IP zablokované. Klient sa to dozvedel ráno z reportu. Nestratil ani objednávku."
+### Spoločné komponenty
 
-> **"B2B portál, utorok 9:14"**  
-> "Bývalý zamestnanec sa skúsil prihlásiť starým heslom. Detekovali sme to, zablokovali účet, upozornili majiteľa. Stálo by to firmu odhadom 80 000 € v ukradnutých kontaktoch."
+**Nový `PageShell.tsx`** — wrapper pre všetky podstránky:
+```tsx
+<div className="min-h-screen bg-background wire-dots">
+  <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4 pb-16">
+    <WireNav />
+    <main className="mt-12">{children}</main>
+    <WireFooter />
+  </div>
+</div>
+```
 
-> **"Rezervačný systém, nedeľa 4:33"**  
-> "Server padol pre chybu v update. Telefonát klientovi o 4:35, oprava do 5:20. Nikto z hostí ráno nevšimol nič nezvyčajné."
+**`LegalPageLayout.tsx`** — pre 4 legal stránky (zdieľaný štýl s side TOC vľavo, content vpravo).
 
-### 7. FAQ — doplniť 4 nové otázky
-- "Čo presne robíte cez víkendy a sviatky?"
-- "Môj eshop je malý — oplatí sa mi to?"
-- "Koľko ma bude stáť hacknutý web vs. vaša služba?"
-- "Aký je rozdiel medzi vami a hostingom (napr. Websupport)?"
+### Úpravy existujúcich súborov
 
-### 8. Footer mikrocopy
-Pridať pásik nad footer: "Tento web stráži: NEXIFY GUARD · Status: 🟢 ALL SYSTEMS NORMAL · Posledný incident: pred 47 dňami"
+**`App.tsx`** — pridať 8 nových routes pred `*` catch-all.
 
-## Komponenty (nové súbory v `src/components/landing/`)
-- `Guard.tsx` — hlavná 4-stĺpcová sekcia
-- `ThreatBanner.tsx` — alarmujúci pásik so štatistikou
-- `WatchedThreats.tsx` — 2-stĺpcová checklist sekcia  
-- `Stories.tsx` — 3 príbehy z praxe
-- `GuardStatusBar.tsx` — live status pásik nad footer
+**`WireFooter.tsx`** — nahradiť `href="#"` reálnymi `<Link to="/...">` z react-router-dom. Služby column → `<a href="/#služby">` (anchor na landing).
 
-## Úpravy existujúcich súborov
-- `Hero.tsx` — prepísať H1, lede, stat labely
-- `Tiers.tsx` — premenovať tier názvy, pridať "spíte pokojne, lebo…" do popisov
-- `FAQ.tsx` — pridať 4 otázky o strážnej službe
-- `Index.tsx` — vložiť nové sekcie v správnom poradí
-- `WireNav.tsx` — pridať odkaz "Strážna služba" do navigácie
+**`WireNav.tsx`** — logo a "Login" button budú `Link` na `/`. Pridať: keď nie sme na `/`, namiesto anchor menu zobraziť "← Späť na hlavnú".
 
-## Tone of voice (zachovať vo všetkom novom texte)
-- **Po lopate, žiadny IT žargón** — "brute-force" vždy vysvetliť ako "skúšanie hesiel"
-- **Druhá osoba** — "váš eshop", "vy spíte, my…"
-- **Konkrétne čísla a časy** — nie "rýchlo" ale "do 60 sekúnd"
-- **Príklady z reálneho života** — piatok večer, čierny piatok, sviatky
-- **Bez strašenia** ale s rešpektom k riziku
+### Tone & jazyk
+Všetko v slovenčine, profesionálny ale prístupný tón. Legal stránky formálnejšie, blog/case studies ľudsky, kontakt akčne.
 
-## Vizuálny štýl
-Zachovaný 1:1 — wireframe SaaS, biele BG, mono fonty, dashed borders, blue akcent. Nové sekcie používajú existujúce utility (`wire-border`, `wire-shadow`, `PlaceholderBox`, `WireAnnotation`, `SectionMarker`).
+### Vizuálny štýl
+1:1 zachovaný — `wire-border`, `wire-shadow`, `SectionMarker`, dashed borders, `font-mono` labely, blue akcent. Žiadne nové farby ani fonty.
+
+### Nové súbory
+- `src/components/layout/PageShell.tsx`
+- `src/components/layout/LegalPageLayout.tsx`
+- `src/pages/AboutPage.tsx`
+- `src/pages/CaseStudiesPage.tsx`
+- `src/pages/BlogPage.tsx`
+- `src/pages/ContactPage.tsx`
+- `src/pages/PrivacyPage.tsx`
+- `src/pages/DpaPage.tsx`
+- `src/pages/TermsPage.tsx`
+- `src/pages/CookiesPage.tsx`
+
+### Upravené súbory
+- `src/App.tsx` — routes
+- `src/components/landing/WireFooter.tsx` — Link namiesto href="#"
+- `src/components/landing/WireNav.tsx` — Link na logo, conditional menu
 
