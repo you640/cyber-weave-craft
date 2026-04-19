@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/dashboard/AdminSidebar";
 import { Overview } from "@/components/dashboard/panels/Overview";
 import { McpPanel } from "@/components/dashboard/panels/McpPanel";
+import { ShellPanel } from "@/components/dashboard/panels/ShellPanel";
 import { UserMenu } from "@/components/auth/UserMenu";
 
 const Dashboard = () => {
@@ -34,6 +35,7 @@ const Dashboard = () => {
             <Routes>
               <Route index element={<Overview />} />
               <Route path="mcp" element={<McpPanel />} />
+              <Route path="shell" element={<ShellPanel />} />
               <Route path="*" element={<Navigate to="." replace />} />
             </Routes>
           </main>
