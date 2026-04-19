@@ -8,6 +8,7 @@ import { WatchedThreats } from "@/components/landing/WatchedThreats";
 import { AddonsTable } from "@/components/landing/AddonsTable";
 import { Retainers } from "@/components/landing/Retainers";
 import { Stories } from "@/components/landing/Stories";
+import { Partner } from "@/components/landing/Partner";
 import { FAQ } from "@/components/landing/FAQ";
 import { AttackMap } from "@/components/landing/AttackMap";
 import { GuardStatusBar } from "@/components/landing/GuardStatusBar";
@@ -28,6 +29,7 @@ const Index = () => {
           <AddonsTable />
           <Retainers />
           <Stories />
+          <Partner />
           <FAQ />
           <AttackMap />
         </main>
