@@ -1,0 +1,41 @@
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AdminSidebar } from "@/components/dashboard/AdminSidebar";
+import { Overview } from "@/components/dashboard/panels/Overview";
+import { UserMenu } from "@/components/auth/UserMenu";
+
+const Dashboard = () => {
+  useEffect(() => {
+    document.title = "Admin · Control · Nexify";
+  }, []);
+
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background wire-dots">
+        <AdminSidebar />
+
+        <div className="flex-1 flex flex-col min-w-0">
+          <header className="h-14 flex items-center gap-3 px-4 md:px-6 border-b border-dashed border-border bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+            <SidebarTrigger className="font-mono" />
+            <Link
+              to="/"
+              className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ← exit
+            </Link>
+            <div className="ml-auto">
+              <UserMenu />
+            </div>
+          </header>
+
+          <main className="flex-1 px-4 md:px-8 py-8 max-w-6xl w-full">
+            <Overview />
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+};
+
+export default Dashboard;

@@ -14,7 +14,9 @@ import DpaPage from "./pages/DpaPage.tsx";
 import TermsPage from "./pages/TermsPage.tsx";
 import CookiesPage from "./pages/CookiesPage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
+import Dashboard from "./pages/Dashboard.tsx";
 import { AuthProvider } from "./components/auth/AuthProvider";
+import { AdminRoute } from "./components/auth/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,14 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <AdminRoute>
+                  <Dashboard />
+                </AdminRoute>
+              }
+            />
             <Route path="/o-nas" element={<AboutPage />} />
             <Route path="/case-studies" element={<CaseStudiesPage />} />
             <Route path="/blog" element={<BlogPage />} />
