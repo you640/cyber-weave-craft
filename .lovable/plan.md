@@ -1,66 +1,63 @@
-User chce minimálny scope: DB + guard + základný dashboard layout. Žiadny shell/MCP/users zatiaľ.
 
-## Plán: Admin foundation (krok 1/2)
 
-### 1. Database migrácia
+## Plán: Shell panel + vps-exec edge funkcia
 
-- `app_role` enum: `'admin'`, `'user'`
-- `user_roles` tabuľka: `id`, `user_id` (uuid, FK na auth.users s ON DELETE CASCADE), `role` (app_role), `created_at`, UNIQUE(user_id, role)
-- RLS enabled, policy: user vidí svoje role (`auth.uid() = user_id`), admin vidí všetko
-- `has_role(_user_id uuid, _role app_role)` → SECURITY DEFINER, STABLE, search_path=public
-- Update `handle_new_user()`: ak `NEW.email = 'larsenevans@proton.me'` → INSERT do `user_roles` (admin), inak (user)
-- `admin_command_log` tabuľka: `id`, `admin_id` (uuid), `command` (text), `exit_code` (int), `stdout_snippet` (text), `created_at`. RLS: len admin SELECT, len admin INSERT (cez `has_role`)
-- Po migrácii spustím manuálny INSERT pre `larsenevans@proton.me` ak už existuje v `auth.users` (cez insert tool, lookup id z profiles)
+### 1. Edge funkcia `supabase/functions/vps-exec/index.ts`
+- Auth: Bearer JWT → `getUser()` → `has_role(user.id, 'admin')`. Inak 401/403.
+- Validácia tela (zod): `{ command: string (1-500 znakov) }`.
+- **Whitelist** (server-side, hardcoded set povolených base príkazov):
+  ```
+  uptime, whoami, hostname, date, df, free, uname,
+  systemctl status, systemctl is-active, journalctl --no-pager -n,
+  ps aux, top -bn1, ss -tulpn, netstat -tulpn,
+  ls, cat, tail, head, grep, wc,
+  docker ps, docker logs, docker stats --no-stream,
+  ufw status, who, w, id
+  ```
+  - Parser: rozsekne na tokeny, vezme prvý (alebo prvé dva pre `systemctl status`, `docker ps` atď.) a porovná s množinou. Žiadne `;`, `&&`, `|`, `` ` ``, `$(`, `>`, `<`, newline. Inak 400 `BLOCKED`.
+- Ak `VPS_BRIDGE_URL` + `VPS_SHARED_SECRET` nie sú nastavené → 503 `BRIDGE_NOT_CONFIGURED` (panel to ukáže pekne).
+- POST na `${VPS_BRIDGE_URL}` s `Authorization: Bearer ${VPS_SHARED_SECRET}` a `{ command }`. Timeout 15s (`AbortController`).
+- Bridge vráti `{ exit_code, stdout, stderr, duration_ms }`.
+- **Audit log**: insert do `admin_command_log` (`admin_id`, `command`, `exit_code`, `stdout_snippet` = prvých 500 znakov stdout). Insert ide cez user-scoped klienta (RLS vyžaduje `auth.uid() = admin_id`).
+- Response: `{ exit_code, stdout, stderr, duration_ms }`.
+- Config: pridať `[functions.vps-exec] verify_jwt = false` do `supabase/config.toml` (validujeme v kóde).
 
-### 2. Frontend — admin infra
+### 2. Shell panel `src/components/dashboard/panels/ShellPanel.tsx`
+- Header: `// SHELL · 03` + "Vzdialený terminál · 194.182.87.6".
+- **Status pásik** (wire-border): probe `whoami` pri mount → `[ ONLINE / NOT CONFIGURED / ERROR ]` + last-seen čas.
+- **Terminálová karta** (wire-border, `bg-[hsl(var(--wire-bg-soft))]`, font-mono):
+  - Scrollovateľná história (output blokov: prompt riadok `tapfast@vps:~$ <cmd>` v primary, stdout v foreground, stderr v destructive, exit code badge).
+  - Input riadok dole: `$` prefix + `<input>` + Enter na execute. Disabled počas pending. Šípka hore → predošlý príkaz (lokálna history).
+- **Quick actions** (chip tlačidlá): `uptime`, `df -h`, `free -h`, `systemctl status caddy`, `docker ps`. Klik → predvyplní + spustí.
+- **Whitelist info** (collapsible): zoznam povolených príkazov, marker `// POLICY · ALLOWLIST`.
+- **Recent commands** (vpravo / pod): posledných 10 z `admin_command_log` (select cez supabase client, RLS to obmedzí na adminov), refresh po každom exec.
+- Error handling: 400 BLOCKED → červený inline hint "[ BLOCKED · príkaz nie je v allowliste ]", 503 → "[ BRIDGE NOT CONFIGURED · doplň VPS_BRIDGE_URL a VPS_SHARED_SECRET ]" + odkaz čo nastaviť.
 
-- `src/hooks/use-is-admin.ts`: použije `useAuth()`, volá `supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' })`, vracia `{ isAdmin, loading }`
-- `src/components/auth/AdminRoute.tsx`: wrapper, kým loading → wireframe loading state, ak nie admin → `<Navigate to="/auth" replace>`, inak children
-
-### 3. Dashboard UI (len kostra)
-
-- `src/pages/Dashboard.tsx`: `<SidebarProvider>` + `<AdminSidebar>` + main content s `<Overview />` panelom. Používa `<PageShell>` style ale custom (lebo má sidebar)
-- `src/components/dashboard/AdminSidebar.tsx`: shadcn sidebar, `collapsible="icon"`, items: Overview (active), Users, Attack Feed, Shell, MCP, Settings — všetky okrem Overview majú badge `[ SOON ]` a sú disabled. Marker `// CONTROL · 11`
-- `src/components/dashboard/panels/Overview.tsx`:
-  - Header: `// OVERVIEW · 01` + "Riadiace centrum"
-  - 4 KPI karty (wire-border): "Používatelia spolu", "Profily dnes", "Útoky zablokované", "VPS uptime" — počítače reálne kde to ide:
-    - users total: `select count(*) from profiles`
-    - profiles today: `select count(*) from profiles where created_at > current_date`
-    - útoky: placeholder `—` (nemáme persisted data)
-    - uptime: placeholder `—` (nie je bridge ešte)
-  - Recent signups list (posledných 5 z `profiles`, email + relative time)
-  - Statusbar dole: `● admin · ${user.email} · session aktívna`
-
-### 4. Routing
-
-- `src/App.tsx`: pridať `<Route path="/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />`
-- `src/components/auth/UserMenu.tsx`: ak `isAdmin` → pridať `Admin →` link na `/dashboard` v dropdowne
+### 3. Sidebar + routing
+- `AdminSidebar.tsx`: Shell položka aktívna, `url: "/dashboard/shell"`, ikona `Terminal`. Odstrániť `[ SOON ]`.
+- `Dashboard.tsx`: pridať `<Route path="shell" element={<ShellPanel />} />`.
 
 ### Súbory
 
 **Nové:**
-
-- migrácia (app_role, user_roles, has_role, admin_command_log, update handle_new_user)
-- `src/hooks/use-is-admin.ts`
-- `src/components/auth/AdminRoute.tsx`
-- `src/pages/Dashboard.tsx`
-- `src/components/dashboard/AdminSidebar.tsx`
-- `src/components/dashboard/panels/Overview.tsx`
+- `supabase/functions/vps-exec/index.ts`
+- `src/components/dashboard/panels/ShellPanel.tsx`
 
 **Upravené:**
-
-- `src/App.tsx` (route)
-- `src/components/auth/UserMenu.tsx` (Admin link)
-
-### Vizuál
-
-1:1 wire estetika. Sidebar má `wire-border-r`, mono labely, blue active state. KPI karty `wire-border wire-shadow`, big number v `font-mono text-4xl`, label v `text-[10px] tracking-[0.2em] uppercase`. Disabled sidebar items majú `opacity-40` + `[ SOON ]` badge.
+- `supabase/config.toml` (`[functions.vps-exec] verify_jwt = false`)
+- `src/components/dashboard/AdminSidebar.tsx` (Shell aktívny)
+- `src/pages/Dashboard.tsx` (route `shell`)
 
 ### Bezpečnosť
+- Admin-only cez `has_role` RPC v edge funkcii ✓
+- Server-side allowlist + zákaz shell metaznakov ✓
+- Audit log každého pokusu (vrátane BLOCKED → log s `exit_code = -1`) ✓
+- Timeout 15s, max stdout snippet 500 znakov ✓
+- Žiadne secrets v kóde, všetko cez `Deno.env` ✓
 
-- Role v separátnej tabuľke (NIKDY na profiles) ✓
-- `has_role` SECURITY DEFINER (no RLS recursion) ✓
-- `AdminRoute` overuje cez RPC, nie cez client-side hardcoded email ✓
-- `admin_command_log` RLS: select+insert len pre adminov ✓  
-  
-+ MCP a napojenie s vlastnny VPS to mus byt ! 
+### Potrebné secrets (panel ich vypýta runtime)
+- `VPS_BRIDGE_URL` — napr. `https://vps.tapfast.tld/exec` (bridge na VPS, port 8443 cez Caddy)
+- `VPS_SHARED_SECRET` — bearer token, ktorý bridge očakáva
+
+Doplníš ich neskôr — kým nie sú, panel ukáže `[ BRIDGE NOT CONFIGURED ]`.
+
