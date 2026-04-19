@@ -1,48 +1,66 @@
 
 
-User wants a WIREFRAME design — SaaS edition, white background. Not the dark cyberpunk version. Wireframe = raw, sketchy, low-fi mockup aesthetic with hand-drawn / blueprint feel, but SaaS-polished.
+User wants 4 themed PNG images for the wireframe SaaS cybersecurity landing page. They should:
+1. Fit the placeholders: `FIG_01 · dashboard.png`, `logs`, `alerts`, `report`
+2. When combined in frames → form one big cohesive image
+3. Each individually meaningful when opened alone
 
-## Wireframe SaaS Landing Page – Cenník 2026
+Style must match the wireframe aesthetic: white background, black lines, electric blue accent, dashed borders, mono labels, low-fi mockup feel.
 
-Prerobím `Index.tsx` na **wireframe-style landing page** s bielym pozadím a obsahom z cenníka kybernetickej bezpečnosti. Estetika: low-fidelity SaaS mockup ako z Figma / Balsamiq, ale s tasteful polish.
+## Plán: 4 wireframe-style PNG mockupy
 
-### Vizuálny jazyk (wireframe SaaS)
-- **Pozadie**: čisté biele `#ffffff`, jemný dot grid alebo blueprint mriežka (`#f0f0f0`)
-- **Farby**: čierna `#0a0a0a`, šedé tóny (`#666`, `#999`, `#e5e5e5`), jeden akcent **electric blue** `#2563eb` pre CTA a highlighty
-- **Typografia**: 
-  - **JetBrains Mono** pre labels, kódy, ceny (wireframe annotations)
-  - **Inter** pre headlines a body
-  - Handwritten accent (Caveat) pre wireframe poznámky typu "← najpopulárnejší"
-- **Štýl prvkov**:
-  - Dashed borders (`border-dashed`), 1px solid lines
-  - Placeholder boxy s diagonálnym šrafovaním (`<div class="placeholder">`)
-  - "Image goes here" boxy s X krížom (SVG)
-  - Annotation šípky a poznámky na okrajoch
-  - Wireframe komponenty: button placeholders, input mockups, fake nav
+Vygenerujem 4 PNG obrázky cez AI gateway (nano banana pro pre vysokú kvalitu), každý 1200×800px, ktoré:
+- **Samostatne** dávajú zmysel (každý je plnohodnotný UI mockup)
+- **Spolu** tvoria jeden vizuálny príbeh — security operations dashboard rozdelený do 4 panelov
 
-### Štruktúra sekcií
-1. **Top nav wireframe** – logo placeholder `[LOGO]`, nav links, "Sign up" button mockup
-2. **Hero** – veľký H1 "Kybernetická bezpečnosť bez kompromisov", lede, dva CTA buttony (primary blue + ghost), 4-stat grid v dashed boxoch, vpravo placeholder pre "product screenshot" so šrafou
-3. **Annotation banner** – wireframe markup `// 01 · BALÍČKY` s handwritten šípkou
-4. **Tiers** – 3 karty s dashed bordermi, "POPULAR" stamp na strednej, ceny v mono fonte, feature listy s `[ ]` checkbox placeholdermi
-5. **Services grid** – 8 service kariet, každá s ID kódom (SVC_01…), placeholder ikonou (geometric SVG), deliverables list
-6. **Add-ons table** – čistá wireframe tabuľka s tenkými linkami
-7. **Retainers** – 3 paušály ako pricing kartičky
-8. **FAQ** – accordion s `[+]` `[−]` mono indikátormi
-9. **Footer** – wireframe baseline, signature `nexify-studio.tech`, version stamp
+### Vizuálny jazyk (zhodný s landing page)
+- Biele pozadie `#ffffff`
+- Čierne čiary, šedé tóny, electric blue `#2563eb` akcent
+- JetBrains Mono labels, dashed/solid 1px borders
+- Minimal wireframe SaaS estetika (Balsamiq/Figma low-fi)
+- Žiadne fotorealistické prvky, iba UI mockup elementy
 
-### Komponenty (`src/components/landing/`)
-- `WireNav.tsx`
-- `Hero.tsx` – vrátane `ScreenshotPlaceholder.tsx`
-- `Tiers.tsx`
-- `Services.tsx`
-- `AddonsTable.tsx`
-- `Retainers.tsx`
-- `FAQ.tsx` (Radix Accordion)
-- `WireFooter.tsx`
-- `WireAnnotation.tsx` – reusable handwritten šípky / poznámky
-- `PlaceholderBox.tsx` – šrafovaný placeholder so X
+### 4 obrázky
 
-### Design system updates
-- `index.css`: light theme tokens (background white, foreground near-black, accent blue, muted grey), dot-grid background utility, dashed border utility
-- `tailwind.config.ts`: extend fontFamily (mono, sans,
+**1. `dashboard.png`** — Hlavný overview panel
+- Header s logom `[NEXIFY]`, tabs (Overview / Logs / Alerts)
+- 4 stat karty: Threats Blocked, Uptime %, Active Scans, Risk Score
+- Veľký line chart "Traffic vs Attacks (24h)" s blue líniou
+- Side panel so zoznamom serverov so status dotmi
+
+**2. `logs.png`** — Log forensics view
+- Tabuľka access logov: timestamp, IP, method, path, status, threat tag
+- Filter chips hore (`[7d] [30d] [BLOCKED] [SUSPICIOUS]`)
+- Highlighted riadky s červeným threat indikátorom
+- Sparkline graf vpravo (requests/min)
+
+**3. `alerts.png`** — Alerts & incidents board
+- Kanban-style 3 stĺpce: `NEW`, `INVESTIGATING`, `RESOLVED`
+- Karty incidentov so severity badges (CRITICAL/HIGH/MED)
+- CVE odkazy, timestamps, assigned engineer placeholders
+- Top banner: "1 active incident · response SLA 2h 14m"
+
+**4. `report.png`** — PDF audit report náhľad
+- A4 dokument layout (page-like)
+- Header: "SECURITY AUDIT REPORT · Q1 2026"
+- Executive summary block, findings list s CVSS skóre
+- Donut chart (severity breakdown), checklist remediation
+- Page footer `// p.07 · nexify-studio.tech`
+
+### Technický postup
+1. Skopírujem AI gateway script do `/tmp/`
+2. Pre každý obrázok zavolám `google/gemini-3-pro-image-preview` (nano banana pro) s detailným promptom popisujúcim wireframe estetiku + obsah panela
+3. Uložím do `/mnt/documents/`:
+   - `dashboard.png`
+   - `logs.png`
+   - `alerts.png`
+   - `report.png`
+4. QA: zobrazím každý obrázok cez `lov-view`, skontrolujem že:
+   - Vyzerajú ako wireframe (nie fotorealistické)
+   - Text je čitateľný a nepretieňa sa
+   - Farby sedia (biele BG, blue akcent)
+   - Spolu tvoria koherentný vizuálny set
+5. Doručím cez `<lov-artifact>` tagy
+
+Užívateľ ich potom môže stiahnuť a vložiť do landing page placeholdrov, prípadne v ďalšom kroku ich automaticky integrujem do `Hero.tsx` / `Services.tsx`.
+
