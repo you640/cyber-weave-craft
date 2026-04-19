@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +12,7 @@ import {
 
 export const UserMenu = () => {
   const { user, signOut, loading } = useAuth();
+  const { isAdmin } = useIsAdmin();
 
   if (loading) {
     return (
@@ -43,6 +45,11 @@ export const UserMenu = () => {
           {user.email}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {isAdmin && (
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link to="/dashboard">Admin →</Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={signOut} className="cursor-pointer">
           Odhlásiť sa →
         </DropdownMenuItem>
