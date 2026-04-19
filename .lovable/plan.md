@@ -1,128 +1,92 @@
 
 
-User wants me to create standalone pages/sections for footer links that currently point to `#` (dead links). Need to decide: separate routes vs in-page sections.
+User chce prerobiť `GuardStatusBar` z jednoduchého status pásika na **plnohodnotnú "cyber attack map" sekciu** s live counter, animovanými číslami, log streamom a vizuálnou mapou útokov. Stále v wireframe estetike (biele BG, mono, dashed borders, blue akcent).
 
-Looking at footer in `WireFooter.tsx`:
-- **Služby**: Audit logov, WP hardening, Pentest, WAF setup → these are already in `Services.tsx` table on landing
-- **Spoločnosť**: O nás, Case studies, Blog, Kontakt → mostly missing
-- **Legal**: Privacy, DPA, Terms, Cookies → missing
+## Plán: Cyber Attack Map nad footerom
 
-Best approach: separate routes (real pages) for legal + company pages. Služby links → anchor scroll to existing Services section + service detail modals would be overkill, just deep-link to `/sluzby/audit-logov` style or anchor. Simplest: anchor to `#služby` for Služby column (already exists), real routes for the rest.
+Premenujem `GuardStatusBar.tsx` na **`AttackMap.tsx`** (nový komponent, väčšia plocha) a starý status bar nechám ako tenký pásik priamo nad footerom.
 
-## Plán: Doplniť plnohodnotné stránky pre footer odkazy
+### Layout — 2 vrstvy
 
-Vytvorím **8 nových stránok** ako samostatné routes + zachovám wireframe estetiku (biele BG, mono fonty, dashed borders, blue akcent). Každá stránka bude mať `WireNav` hore, `WireFooter` dole a obsah zarovnaný do `max-w-7xl` containeru.
+**Vrstva 1: `AttackMap.tsx`** — veľká sekcia (cca 500px výška)  
+Marker: `// LIVE · 09 · CYBER OPERATIONS CENTER`  
+Nadpis: "Live mapa útokov · práve teraz"
 
-### Nové routes v `App.tsx`
+3-stĺpcový grid (12-col):
+- **Ľavý panel (3 cols)** — Counter stack:
+  - Veľký animovaný counter "ÚTOKOV ZABLOKOVANÝCH DNES" — 5-miestne číslo, mono, ~6xl, tikajúce nahor
+  - Pod tým 4 menšie countery: "Brute-force", "DDoS", "SQL inject", "Bot scrapery" — každý so svojou rastúcou hodnotou
+  - Sparkline mini-graf "posledných 60 minút"
+  
+- **Stredný panel (5 cols)** — ASCII/SVG world map:
+  - Wireframe outline svetadielov (jednoduchý SVG path, nie real mapa)
+  - Animované "ping" bodky na náhodných koordinátoch (Brazília, Rusko, Čína, Nigéria, USA, Vietnam) — pulse animácia v primary blue
+  - Každé X sekúnd nový ping s textom typu `[ATTACK] 185.220.x.x → BLOCKED`
+  - Legend dole: typy útokov + ich farby (všetky v blue škále)
 
-```
-/o-nas              → AboutPage.tsx
-/case-studies       → CaseStudiesPage.tsx
-/blog               → BlogPage.tsx
-/kontakt            → ContactPage.tsx
-/privacy            → PrivacyPage.tsx
-/dpa                → DpaPage.tsx
-/terms              → TermsPage.tsx
-/cookies            → CookiesPage.tsx
-```
+- **Pravý panel (4 cols)** — Live log stream:
+  - Mono terminál vibe — tmavší soft bg
+  - Auto-scrolling list ~10 riadkov, nové sa pridávajú zhora
+  - Format: `[14:23:07] BLOCK · 91.92.x.x · brute-force · /wp-admin`
+  - Status farby: BLOCK (blue), ALERT (orange-handwritten), OK (muted)
+  - Header: `tail -f /var/log/nexify-guard.log` + blinking cursor
 
-### Footer Služby stĺpec → anchor scroll
-Linky `Audit logov`, `WP hardening`, `Pentest`, `WAF setup` upravím tak, aby skrolovali na `#služby` sekciu na landingu (existuje v `Services.tsx`). Nepotrebujú samostatné stránky — už majú detail v Services tabuľke.
+**Vrstva 2: `GuardStatusBar.tsx`** — zostane ako tenký pásik (existujúci) hneď pod AttackMap, doplním tam aj malý "active threats: N" counter.
 
-### Obsah stránok (každá ~ wireframe layout s `SectionMarker`)
+### Animácia counterov
+- Custom `useCounter` hook v `src/hooks/use-counter.ts`:
+  - Štartuje z deterministickej hodnoty na základe času od polnoci (aby každý reload nezačal od 0)
+  - Inkrement každých 800-3000ms o 1-7 (random jitter)
+  - Smooth count-up cez `requestAnimationFrame` (200ms tween na každý nový target)
+- Sub-countery sú deriváty hlavného (cca 45% / 25% / 18% / 12% split)
 
-**1. `/o-nas` — O nás**
-- Marker `// COMPANY · 01`
-- H1: "Nezávislý cybersec butik z Bratislavy"
-- 3-stĺpcový text: príbeh, misia, prístup
-- Tím sekcia: 3 placeholder karty (founder, security engineer, devops)
-- Stat row: roky skúseností, počet auditov, klientov
+### Live log generator
+- `src/lib/attack-log.ts`:
+  - Pole IP prefixov, attack typov, target paths, krajín
+  - Funkcia `generateLogEntry()` → vracia `{ timestamp, ip, country, type, target, action }`
+  - V komponente `setInterval(800-2500ms)` pridá nový log, drží max 12 v stave
+- Použijem `flushSync` ne, len obyčajný state — nemusí byť blazing fast
 
-**2. `/case-studies` — Case studies**
-- Marker `// PROOF · 02`
-- 6 wireframe kariet: anonymizované klienty (eshop kozmetika, B2B SaaS, booking, médiá, fintech, healthcare)
-- Každá karta: industry tag, problém, riešenie, metric (např. "−97% brute-force pokusov za 30d")
-- Filter chips hore: `[všetky] [eshop] [SaaS] [korporát]`
+### Mapa — implementácia
+- Inline SVG s wireframe outline kontinentov (zjednodušená geometria, ~6-8 path-ov)
+- Ping bodky: pole fixných lat/lon → SVG x/y koordinátov
+- Každý ping má entry animáciu (scale-in + fade) a po 4s sa resetuje
+- Nový ping každé 1.5-3s, max 5 aktívnych naraz
+- Pri každom ping-u tiež bliká ASCII text `>>> [event] <<<` v rohu mapy
 
-**3. `/blog` — Blog**
-- Marker `// JOURNAL · 03`
-- 6 placeholder článkov v 2-stĺpcovom layoute
-- Každý: dátum, kategória tag, H3 titulok, lead paragraf, "čítať →"
-- Témy: WordPress CVE, NIS2 prehľad, post-mortem incidentu, GDPR FAQ, Cloudflare WAF, RLS Supabase
-- Sidebar: kategórie, tag cloud (mono štýl)
+### Vizuálne detaily (v štýle landing page)
+- Container: `wire-border bg-background` s `wire-shadow`
+- Mono labely všade `font-mono text-[10px] tracking-[0.2em] uppercase`
+- Hlavný counter: žltý `wire-handwritten` accent stamp "↑ live" v pravom hornom rohu
+- Decoratívne: `FIG_09 · live-feed.svg` stamp v rohu (ako u Hero obrázkov)
+- Žiadne nové farby — len existujúce `--primary`, `--wire-*`, `--muted-foreground`
 
-**4. `/kontakt` — Kontakt**
-- Marker `// CONTACT · 04`
-- 2-stĺpcový layout: ľavá info (email, telefón 24/7 incident line, adresa, IČO/DIČ), pravá wireframe form (meno, email, typ požiadavky select, správa, submit)
-- Pásik: "🚨 Incident? Volajte priamo: +421 XXX XXX XXX (24/7)"
-- Form je vizuálny mock, submit zobrazí `toast` "Ďakujeme, ozveme sa do 24h"
+### Nový/upravený obsah
 
-**5. `/privacy` — Privacy Policy**
-- Marker `// LEGAL · PRIVACY`
-- Plnohodnotný GDPR-compliant text v slovenčine: prevádzkovateľ, účely spracovania, právne základy, doby uchovávania, práva dotknutých osôb, kontakt na DPO
-- Štruktúrované do nadpisov H2/H3 s číslovanými sekciami (1., 1.1, 1.2…)
-- Posledná aktualizácia: "platné od 19. 4. 2026"
+**Nové súbory:**
+- `src/components/landing/AttackMap.tsx` — hlavná sekcia
+- `src/components/landing/AttackMap/WorldMap.tsx` — SVG mapa s pingmi
+- `src/components/landing/AttackMap/LiveLog.tsx` — log stream panel
+- `src/components/landing/AttackMap/CounterStack.tsx` — countery panel
+- `src/hooks/use-counter.ts` — animated count-up hook
+- `src/lib/attack-log.ts` — log generator + konštanty (IP, krajiny, typy)
 
-**6. `/dpa` — Data Processing Agreement**
-- Marker `// LEGAL · DPA`
-- Šablóna zmluvy o spracovaní osobných údajov medzi prevádzkovateľom (klient) a sprostredkovateľom (Nexify)
-- Sekcie: predmet, povinnosti sprostredkovateľa, sub-processors zoznam, technické a organizačné opatrenia, audit rights, ukončenie
-- Download CTA mock: `[ Stiahnuť PDF verziu → ]`
+**Upravené súbory:**
+- `src/pages/Index.tsx` — vložiť `<AttackMap />` medzi `<FAQ />` a `<GuardStatusBar />`
+- `src/components/landing/GuardStatusBar.tsx` — pridať mini "active threats: N" counter (aby súvisel s AttackMap)
 
-**7. `/terms` — Terms of Service**
-- Marker `// LEGAL · TERMS`
-- Obchodné podmienky: definície, predmet služby, povinnosti zmluvných strán, cena a platba, SLA (incident response časy), zodpovednosť za škodu, ukončenie, rozhodné právo SK
-- 12+ číslovaných sekcií
+### Performance & cleanup
+- Všetky `setInterval` v `useEffect` s cleanup
+- `requestAnimationFrame` v counter hooku tiež cleanup
+- Nepoužívam externé knižnice — všetko inline SVG + state
 
-**8. `/cookies` — Cookie Policy**
-- Marker `// LEGAL · COOKIES`
-- Zoznam cookies v wireframe tabuľke: názov, účel, doba platnosti, typ (nutné/analytické/marketing)
-- Vysvetlenie ako spravovať cookies v prehliadači
-- Tlačidlo `[ Spravovať preferencie ]` (mock)
+### Tone copy (slovenčina, po lopate)
+- "Útokov zablokovaných dnes" (nie "blocked attacks today")
+- "Práve teraz" / "Posledných 60 minút"
+- Log akcie v EN (autenticky terminál vibe): `BLOCK`, `ALERT`, `MITIGATE`, `ALLOW`
+- Krajiny v SK: "Rusko", "Čína", "Nigéria", "USA", "Brazília", "Vietnam", "Irán"
 
-### Spoločné komponenty
-
-**Nový `PageShell.tsx`** — wrapper pre všetky podstránky:
-```tsx
-<div className="min-h-screen bg-background wire-dots">
-  <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4 pb-16">
-    <WireNav />
-    <main className="mt-12">{children}</main>
-    <WireFooter />
-  </div>
-</div>
-```
-
-**`LegalPageLayout.tsx`** — pre 4 legal stránky (zdieľaný štýl s side TOC vľavo, content vpravo).
-
-### Úpravy existujúcich súborov
-
-**`App.tsx`** — pridať 8 nových routes pred `*` catch-all.
-
-**`WireFooter.tsx`** — nahradiť `href="#"` reálnymi `<Link to="/...">` z react-router-dom. Služby column → `<a href="/#služby">` (anchor na landing).
-
-**`WireNav.tsx`** — logo a "Login" button budú `Link` na `/`. Pridať: keď nie sme na `/`, namiesto anchor menu zobraziť "← Späť na hlavnú".
-
-### Tone & jazyk
-Všetko v slovenčine, profesionálny ale prístupný tón. Legal stránky formálnejšie, blog/case studies ľudsky, kontakt akčne.
-
-### Vizuálny štýl
-1:1 zachovaný — `wire-border`, `wire-shadow`, `SectionMarker`, dashed borders, `font-mono` labely, blue akcent. Žiadne nové farby ani fonty.
-
-### Nové súbory
-- `src/components/layout/PageShell.tsx`
-- `src/components/layout/LegalPageLayout.tsx`
-- `src/pages/AboutPage.tsx`
-- `src/pages/CaseStudiesPage.tsx`
-- `src/pages/BlogPage.tsx`
-- `src/pages/ContactPage.tsx`
-- `src/pages/PrivacyPage.tsx`
-- `src/pages/DpaPage.tsx`
-- `src/pages/TermsPage.tsx`
-- `src/pages/CookiesPage.tsx`
-
-### Upravené súbory
-- `src/App.tsx` — routes
-- `src/components/landing/WireFooter.tsx` — Link namiesto href="#"
-- `src/components/landing/WireNav.tsx` — Link na logo, conditional menu
+### Mobil
+- Na <md: stack 1 stĺpec (countery → mapa → log)
+- Mapa drží svoj aspect ratio, log stream skrátim na 6 riadkov
 
