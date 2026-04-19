@@ -17,7 +17,7 @@ const items = [
   { title: "Overview", url: "/dashboard", icon: LayoutGrid, active: true },
   { title: "Users", url: "#", icon: Users, active: false },
   { title: "Attack Feed", url: "#", icon: Activity, active: false },
-  { title: "Shell", url: "#", icon: Terminal, active: false },
+  { title: "Shell", url: "/dashboard/shell", icon: Terminal, active: true },
   { title: "MCP", url: "/dashboard/mcp", icon: Plug, active: true },
   { title: "Settings", url: "#", icon: Settings, active: false },
 ];
