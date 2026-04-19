@@ -1,82 +1,52 @@
 
 
-User chce pridať social sign-in (Google, Apple, Microsoft, GitHub). Potrebujem skontrolovať čo Lovable Cloud podporuje natívne:
+User chce pridať novú sekciu "Prečo práve my" na landing page, ktorá predstavuje **GRUPPA** ako partnera/dodávateľa enterprise-level developmentu. Logo je modré (#0087FF) — to sa krásne zhoduje s našou primary farbou.
 
-- **Google** ✅ natívne podporovaný
-- **Apple** ✅ natívne podporovaný
-- **Microsoft** ❌ nie je v zozname natívne podporovaných (Email, Phone, Google, Apple, SSO/SAML)
-- **GitHub** ❌ nie je natívne podporovaný v Lovable Cloud
+## Plán: Sekcia "Partner · Enterprise development"
 
-Aktuálne v projekte **neexistuje žiadny auth flow** — žiadny `/auth` route, žiadne login/signup formuláre, žiadne profily, žiadny chránený obsah. WireNav má len mock "Login" tlačidlo bez funkcie. Treba postaviť auth od nuly.
-
-Tiež sa potrebujem opýtať na profily a use case predtým ako začnem stavať.
-
-## Plán: Pridať social sign-in (Google + Apple)
-
-### Realita: čo sa dá a čo nie
-
-Lovable Cloud natívne podporuje len **Google + Apple** (+ Email/Phone/SAML). 
-**Microsoft a GitHub nie sú podporované** — pridanie by vyžadovalo rozpojiť Lovable Cloud a pripojiť externý Supabase projekt, čo zničí súčasné nastavenie. Odporúčam ich vynechať a ísť s Google + Apple, prípadne doplniť email/heslo ako fallback.
-
-### Otvorené otázky pred implementáciou
-
-Potrebujem od teba 2-3 rozhodnutia (pýtam sa nižšie cez kartičky), ale toto je smerový plán.
+### Kam to umiestnim
+Nová sekcia **medzi `<Stories />` a `<FAQ />`** v `src/pages/Index.tsx` — logicky tam, kde už hovoríme o trust signaloch (príbehy klientov → partner → časté otázky).
 
 ### Čo postavím
 
-**1. Auth infrastructure (Lovable Cloud)**
-- Cez "Configure Social Login" tool aktivujem Google + Apple cez `lovable.auth.signInWithOAuth()`
-- Vygeneruje sa `src/integrations/lovable/` modul (managed OAuth, žiadne kľúče netreba)
+**Nový komponent `src/components/landing/Partner.tsx`** v 1:1 wireframe štýle:
 
-**2. Nová stránka `/auth`**
-- Wireframe štýl 1:1 s zvyškom stránky (`wire-border`, mono labely, dashed dividery, blue akcent)
-- Marker `// ACCESS · 10`
-- 2-stĺpcový layout:
-  - **Ľavý panel:** value-prop copy ("prihlás sa do dispečingu", live counter mini-widget, čo dostaneš po prihlásení)
-  - **Pravý panel:** auth karta s tlačidlami:
-    - `[ Pokračovať cez Google → ]`
-    - `[ Pokračovať cez Apple → ]`
-    - dashed divider "alebo"
-    - email + heslo formulár (sign-in / sign-up tab toggle)
-- Po úspechu: redirect na `/` (alebo `/dashboard` ak ho neskôr postavíme)
+- **Marker** `// PARTNER · 08 · ENTERPRISE STACK`
+- **Nadpis**: "Prečo práve my"
+- **Lead**: "Za našou bezpečnosťou stojí partner pre enterprise-level vývoj."
 
-**3. Auth state management**
-- Hook `useAuth()` v `src/hooks/use-auth.ts`:
-  - `onAuthStateChange` listener (nastavený PRED `getSession()`)
-  - vracia `{ user, session, loading, signOut }`
-- React Context `AuthProvider` v `App.tsx` aby celá appka videla session
+**Layout** (12-col grid):
+- **Ľavá strana (5 cols)** — logo card:
+  - `wire-border bg-background wire-shadow` panel
+  - Nahor decorative stamp `FIG_08 · partner.svg`
+  - Veľké GRUPPA logo (modré, na bielom pozadí, padding ~12)
+  - Pod logom mono label: `// technologický partner`
+  - Linka: `nexify-studio.tech ↔ gruppa.sk` (alebo skutočný link ak ho user pošle)
 
-**4. Aktualizácia `WireNav.tsx`**
-- Mock "Login" tlačidlo → reálny `<Link to="/auth">Login</Link>`
-- Keď je user prihlásený: zobraziť `[ user@email.com ▾ ]` dropdown s "Odhlásiť sa"
-- Mobilná verzia rovnako
+- **Pravá strana (7 cols)** — content:
+  - H3: "Enterprise-level development"
+  - Paragraf: "Dodávame technicky náročné enterprise riešenia s presnou architektúrou, dôrazom na škálovateľnosť, kvalitu a budúci rozvoj."
+  - 3 mini-karty pod sebou (alebo grid 3) s pillarmi:
+    - **Architektúra** — "Presná, dokumentovaná, pripravená na rast"
+    - **Škálovateľnosť** — "Riešenia ktoré rastú s biznisom"
+    - **Kvalita & rozvoj** — "Code review, testy, dlhodobá podpora"
 
-**5. Profile table (ak povieš áno na otázku #1)**
-- Migrácia: `profiles` tabuľka s `id` (FK na `auth.users`), `display_name`, `avatar_url`, `created_at`, `updated_at`
-- RLS: user vidí/upravuje len svoj profil
-- Trigger: auto-create profil pri signup z `raw_user_meta_data`
+**Asset handling:**
+- Skopírujem `user-uploads://logo_gruppa_2025_b3.svg` → `src/assets/gruppa-logo.svg`
+- Importujem ako ES6 modul v `Partner.tsx`
+
+### Vizuálny štýl
+1:1 zachovaný — `wire-border`, `wire-shadow`, `font-mono` labely, dashed dividery, blue (#0087FF už je naša `--primary`!), žiadne nové farby ani fonty.
 
 ### Súbory
 
 **Nové:**
-- `src/pages/AuthPage.tsx`
-- `src/hooks/use-auth.ts`
-- `src/components/auth/AuthProvider.tsx`
-- `src/components/auth/UserMenu.tsx`
-- (auto) `src/integrations/lovable/index.ts`
+- `src/assets/gruppa-logo.svg` (kopírujem z uploadu)
+- `src/components/landing/Partner.tsx`
 
 **Upravené:**
-- `src/App.tsx` — `/auth` route + `<AuthProvider>` wrap
-- `src/components/landing/WireNav.tsx` — Login link + UserMenu
-- (možno) migrácia pre `profiles` tabuľku
+- `src/pages/Index.tsx` — vložiť `<Partner />` medzi `<Stories />` a `<FAQ />`
 
-### Vizuál
-Žiadne nové farby/fonty. Len existujúce wireframe utility. Tlačidlá majú `wire-shadow-sm`, hover micro-shift, mono labely. Apple tlačidlo čierne (foreground bg), Google biele (border), email accent primary.
-
-### Otázky k vyjasneniu
-
-Hneď ti pošlem 3 kartičky — bez tvojich odpovedí by som hádal:
-1. Či vôbec robiť Microsoft/GitHub (vyžaduje rozpojenie Cloud)
-2. Či potrebuješ user profily (display name, avatar) alebo stačí `auth.users`
-3. Či pridať aj email + heslo formulár, alebo len social
+### Otvorená otázka
+Nemám URL na GRUPPA web — dám ako placeholder text bez linku, alebo ak chceš, pošli URL a urobím externý odkaz s `target="_blank"`.
 
