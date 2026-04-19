@@ -36,11 +36,11 @@ const AboutPage = () => (
       {[
         {
           h: "Príbeh",
-          p: "Začali sme v 2019 ako dvaja kamaráti z bug bounty komunity. Mali sme dosť toho, ako veľké firmy predávajú „bezpečnosť" v PowerPointe. Chceli sme robiť technickú prácu, nie reporty pre reporty.",
+          p: 'Začali sme v 2019 ako dvaja kamaráti z bug bounty komunity. Mali sme dosť toho, ako veľké firmy predávajú „bezpečnosť" v PowerPointe. Chceli sme robiť technickú prácu, nie reporty pre reporty.',
         },
         {
           h: "Misia",
-          p: "Slovenské a české firmy si zaslúžia rovnakú úroveň ochrany ako bratislavské banky. Bez korporátnej byrokracie, bez minimálnych ročných kontraktov, bez „call your account manager".",
+          p: 'Slovenské a české firmy si zaslúžia rovnakú úroveň ochrany ako bratislavské banky. Bez korporátnej byrokracie, bez minimálnych ročných kontraktov, bez „call your account manager".',
         },
         {
           h: "Prístup",
