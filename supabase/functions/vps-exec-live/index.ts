@@ -6,14 +6,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Live shell: NO allowlist (power-user mode), but still:
+// Live shell: NO command allowlist (power-user mode), but still:
 //  - admin-only,
-//  - rejects shell injection metacharacters that span multiple commands,
+//  - rejects shell metacharacters enabling chaining / substitution / redirection,
 //  - hard timeout,
 //  - full audit log (command + exit + stdout snippet).
 // Server-side proxy: secrets never reach the browser.
 
-const HARD_FORBIDDEN = /[`\n\r]/; // newlines & backticks always blocked
+// Block: backtick, newline/CR, ; & | $ > <  and $( … ) command substitution.
+const HARD_FORBIDDEN = /[;&|`$><\n\r]|\$\(/;
 const MAX_LEN = 2000;
 
 type ValidationResult = { ok: true } | { ok: false; reason: string };
@@ -23,7 +24,8 @@ function validateLive(cmd: string): ValidationResult {
   const trimmed = cmd.trim();
   if (trimmed.length === 0) return { ok: false, reason: "empty command" };
   if (trimmed.length > MAX_LEN) return { ok: false, reason: "command too long" };
-  if (HARD_FORBIDDEN.test(trimmed)) return { ok: false, reason: "forbidden character (newline/backtick)" };
+  if (HARD_FORBIDDEN.test(trimmed))
+    return { ok: false, reason: "forbidden shell metacharacter (; & | $ > < ` newline)" };
   return { ok: true };
 }
 
