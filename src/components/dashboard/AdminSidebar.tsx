@@ -1,4 +1,4 @@
-import { LayoutGrid, Users, Activity, Terminal, Plug, Settings, HeartPulse, ShieldCheck, FileText, Stethoscope } from "lucide-react";
+import { LayoutGrid, Users, Activity, Terminal, Plug, Settings, HeartPulse, ShieldCheck, FileText, Stethoscope, Zap } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
