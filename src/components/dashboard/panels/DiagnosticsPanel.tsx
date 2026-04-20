@@ -81,6 +81,21 @@ export const DiagnosticsPanel = () => {
             </div>
           )}
 
+          {/* System degraded banner */}
+          {!result.fatal && result.steps.length > 0 && result.steps.some((s) => !s.ok) && (
+            <div className="wire-border bg-destructive/10 border-destructive p-4 flex items-center gap-3">
+              <span className="font-mono text-destructive text-lg animate-pulse">●</span>
+              <div>
+                <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-destructive">
+                  // STATUS · DEGRADED
+                </div>
+                <div className="font-mono text-sm font-semibold text-destructive mt-1">
+                  SYSTEM DEGRADED · {result.steps.filter((s) => !s.ok).length}/{result.steps.length} CHECKS FAILED
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Config block */}
           <section className="wire-border bg-background/60 backdrop-blur-sm p-4">
             <div className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground uppercase mb-3">
