@@ -49,7 +49,7 @@ export const FAQ = () => (
     <SectionMarker num="05" label="Časté otázky" />
     <div className="mb-10 max-w-3xl">
       <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-        FAQ — <span className="italic font-light text-primary">priamo, vecne, bez omáčky</span>
+        FAQ — <span className="font-display italic font-light text-primary">priamo, vecne, bez omáčky</span>
       </h2>
       <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
         Bez dymovej clony. Bez sales poézie. Bez toho, aby vám niekto vysvetľoval, že incident je vlastne príležitosť. Nie je. Je to incident.
