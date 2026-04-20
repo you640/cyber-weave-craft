@@ -11,6 +11,12 @@ const SINGLE_TOKEN_ALLOW = new Set([
   "uptime", "whoami", "hostname", "date", "df", "free", "uname",
   "ls", "cat", "tail", "head", "grep", "wc",
   "who", "w", "id",
+  // Nexify wrapper scripts on VPS (/usr/local/bin/)
+  "nexify-health",
+  "nexify-wp-audit-start",
+  "nexify-wp-audit-status",
+  "nexify-list-reports",
+  "nexify-latest-report",
 ]);
 
 // Two-token allow: first token + required second token
