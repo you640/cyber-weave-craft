@@ -20,6 +20,7 @@ const items = [
   { title: "Reports", url: "/dashboard/reports", icon: FileText, active: true },
   { title: "Diagnostics", url: "/dashboard/diagnostics", icon: Stethoscope, active: true },
   { title: "Shell", url: "/dashboard/shell", icon: Terminal, active: true },
+  { title: "Shell Live", url: "/dashboard/shell-live", icon: Zap, active: true },
   { title: "MCP", url: "/dashboard/mcp", icon: Plug, active: true },
   { title: "Users", url: "#", icon: Users, active: false },
   { title: "Attack Feed", url: "#", icon: Activity, active: false },
