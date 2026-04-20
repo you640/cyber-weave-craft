@@ -104,10 +104,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    const bridgeUrl = Deno.env.get("VPS_BRIDGE_URL");
-    const bridgeSecret = Deno.env.get("VPS_SHARED_SECRET");
-    const basicUser = Deno.env.get("VPS_BASIC_USER");
-    const basicPass = Deno.env.get("VPS_BASIC_PASS");
+    const bridgeUrl = Deno.env.get("MCP_UPSTREAM_URL") ?? Deno.env.get("VPS_BRIDGE_URL");
+    const bridgeSecret = Deno.env.get("MCP_UPSTREAM_TOKEN") ?? Deno.env.get("VPS_SHARED_SECRET");
+    const basicUser = Deno.env.get("OPS_EXEC_BASIC_USER") ?? Deno.env.get("VPS_BASIC_USER");
+    const basicPass = Deno.env.get("OPS_EXEC_BASIC_PASS") ?? Deno.env.get("VPS_BASIC_PASS");
     if (!bridgeUrl || !bridgeSecret) {
       return new Response(
         JSON.stringify({ error: "BRIDGE_NOT_CONFIGURED" }),
