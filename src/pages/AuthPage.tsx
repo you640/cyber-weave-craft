@@ -6,6 +6,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { toast } from "sonner";
 import { WireNav } from "@/components/landing/WireNav";
 import { WireFooter } from "@/components/landing/WireFooter";
+import nexifyLogo from "@/assets/nexify-logo.png";
 
 type Mode = "signin" | "signup" | "forgot";
 
@@ -96,6 +97,11 @@ const AuthPage = () => {
         <WireNav />
 
         <main className="mt-12">
+          <img
+            src={nexifyLogo}
+            alt="Nexify Guard logo"
+            className="h-10 w-auto object-contain mb-4"
+          />
           <div className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground uppercase mb-3">
             // ACCESS · 10 · AUTHENTICATION GATEWAY
           </div>

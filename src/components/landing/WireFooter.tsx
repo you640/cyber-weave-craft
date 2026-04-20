@@ -38,14 +38,9 @@ export const WireFooter = () => (
         <Link to="/" className="inline-flex items-center gap-2 mb-4 group">
           <img
             src={nexifyLogo}
-            alt="Nexify Studio Tech logo"
-            width={44}
-            height={44}
-            className="w-11 h-11 object-contain group-hover:scale-105 transition-transform"
+            alt="Nexify Guard logo"
+            className="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
           />
-          <span className="font-display font-bold text-base tracking-tight">
-            NEXIFY <span className="font-light italic text-primary">studio</span>
-          </span>
         </Link>
         <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
           Nezávislý cybersec butik pre slovenské a české firmy. Audit, pentest, hardening, monitoring a incident response pre tímy, ktoré radšej investujú do obrany než do neskorého ľutovania.
