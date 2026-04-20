@@ -73,7 +73,7 @@ export const Services = () => (
     <SectionMarker num="02" label="À la carte služby" />
     <div className="mb-10">
       <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-        Samostatné <span className="italic font-light text-primary">moduly</span>
+        Samostatné <span className="font-display italic font-light text-primary">moduly</span>
       </h2>
       <p className="mt-3 text-muted-foreground max-w-2xl text-sm md:text-base leading-relaxed">
         Jednotlivé moduly pre firmy, ktoré potrebujú len špecifickú oblasť. Pri 3+ službách platí <span className="text-foreground font-medium">zľava 15 %</span>.
