@@ -32,7 +32,8 @@ export const MfaPanel = () => {
       return;
     }
     const totp = data.totp?.find((f) => f.status === "verified") ?? data.totp?.[0];
-    if (totp && totp.status === "verified") {
+    const totpStatus = (totp as { status?: string } | undefined)?.status;
+    if (totp && totpStatus === "verified") {
       setFactor({ id: totp.id, status: "verified", friendly_name: totp.friendly_name });
       // count remaining recovery codes
       const { count } = await supabase
