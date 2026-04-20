@@ -1,42 +1,35 @@
 
 
 ## Cieľ
-Nahradiť aktuálne logo (`nexify-logo.png`) novým logom NEXIFY GUARD (shield + text) všade, kde sa používa.
-
-## Analýza nového loga
-Nové logo už obsahuje text "NEXIFY GUARD" priamo v obrázku (shield + wordmark). To znamená, že na miestach, kde teraz vedľa loga píšeme "NEXIFY *studio*" textom, by sme mali tento text **odstrániť** — inak vznikne duplicita ("NEXIFY GUARD NEXIFY studio").
+Vygenerovať samostatnú verziu loga — **iba shield bez textu "NEXIFY GUARD"** a **bez pozadia** (transparent PNG) — a použiť ju ako favicon a malé ikony.
 
 ## Plán
 
-### 1. Skopírovať nový logo súbor
-- `lov-copy user-uploads://logooo.png src/assets/nexify-logo.png` — prepíše existujúci asset, takže všetky komponenty čo ho importujú dostanú nové logo automaticky
-- `lov-copy user-uploads://logooo.png public/favicon.png` — aktualizuje aj favicon
+### 1. Vygenerovať shield-only ikonu
+Použiť AI image generation (`google/gemini-3-pro-image-preview` pre najvyššiu kvalitu) s promptom:
+- Iba shield element z existujúceho NEXIFY GUARD loga
+- **Transparentné pozadie** (PNG s alpha kanálom)
+- Štvorcový formát (1:1) vhodný pre favicon
+- Ostré hrany, vysoký kontrast pre čitateľnosť aj v malých veľkostiach (16x16, 32x32)
+- Štýl konzistentný s hlavným logom (rovnaká farebnosť shieldu)
 
-### 2. Upraviť komponenty kde je logo + text "NEXIFY studio"
-Pretože nové logo už má integrovaný wordmark, odstránime sprievodný textový span a zväčšíme logo aby bolo čitateľné:
+Výstup uložiť ako `src/assets/nexify-shield.png`.
 
-- **`src/components/landing/WireNav.tsx`** — odstrániť `<span>NEXIFY studio</span>`, zväčšiť logo z `w-10 h-10` na napr. `h-9 w-auto` (zachovať pomer strán shieldu + textu)
-- **`src/components/landing/WireFooter.tsx`** — to isté, odstrániť sprievodný text, zväčšiť logo na `h-12 w-auto`
-- Upraviť `alt` text na `"Nexify Guard logo"`
+### 2. Aktualizovať favicon
+- Skopírovať shield ikonu do `public/favicon.png` (prepíše existujúcu)
+- `index.html` už referencuje `/favicon.png`, takže netreba meniť HTML
 
-### 3. Pridať logo aj na ďalšie miesta
-- **`src/pages/AuthPage.tsx`** — momentálne nemá logo v hero/auth karte; pridať logo nad nadpis "Vstup do dispečingu" (malé, centrované, napr. `h-10 w-auto`)
-- **`src/pages/Dashboard.tsx`** — v headeri pridať logo vedľa "← exit" linku (malé, `h-7 w-auto`)
+### 3. Overiť QA
+- Otvoriť vygenerovaný PNG a skontrolovať:
+  - Pozadie je naozaj transparentné (nie biele/sivé)
+  - Shield je centrovaný, nie je orezaný
+  - Detail je čitateľný aj pri zmenšení na 32px
 
-### 4. Skontrolovať ostatné miesta
-- `src/assets/gruppa-logo.svg` — nepoužívaný legacy súbor, neriešiť
-- Index.html OG image — externý URL, neriešiť (nesúvisí s týmto)
+### 4. Čo NEMENÍME
+- Hlavné logo v `WireNav`, `WireFooter`, `AuthPage`, `Dashboard` — tam ostáva plné logo s textom
+- Žiadne ďalšie komponenty (zatiaľ nie je miesto kde sa shield-only verzia používa okrem favicon)
 
-## Súbory na úpravu
-1. `src/assets/nexify-logo.png` (prepis cez lov-copy)
-2. `public/favicon.png` (prepis cez lov-copy)
-3. `src/components/landing/WireNav.tsx` (odstránenie textu, zväčšenie loga)
-4. `src/components/landing/WireFooter.tsx` (odstránenie textu, zväčšenie loga)
-5. `src/pages/AuthPage.tsx` (pridanie loga nad H1)
-6. `src/pages/Dashboard.tsx` (pridanie loga do headeru)
-
-## Čo NEMENÍME
-- Routing, edge functions, štýly, copy
-- OG/social share image (externý URL)
-- Tailwind config, fonty
+## Súbory
+1. `src/assets/nexify-shield.png` (nový — vygenerovaný)
+2. `public/favicon.png` (prepísaný)
 
