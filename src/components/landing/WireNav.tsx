@@ -22,7 +22,7 @@ export const WireNav = () => {
             <img
               src={nexifyLogo}
               alt="Nexify Guard logo"
-              className="h-28 w-auto object-contain group-hover:scale-105 transition-transform [filter:drop-shadow(0_2px_6px_hsl(var(--foreground)/0.18))]"
+              className="h-28 w-auto object-contain group-hover:scale-105 transition-transform [filter:drop-shadow(0_6px_14px_hsl(var(--foreground)/0.45))_drop-shadow(0_2px_4px_hsl(var(--foreground)/0.3))]"
             />
           </Link>
           <span className="hidden lg:inline font-mono text-[10px] text-muted-foreground tracking-[0.2em]">
