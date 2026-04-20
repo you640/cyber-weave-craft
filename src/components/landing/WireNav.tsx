@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { UserMenu } from "@/components/auth/UserMenu";
+import nexifyLogo from "@/assets/nexify-logo.png";
 
 const landingLinks = [
   { label: "Strážna služba", href: "#strážna-služba" },
@@ -17,11 +18,20 @@ export const WireNav = () => {
     <nav className="wire-border-solid bg-background sticky top-4 z-40 mx-auto max-w-7xl">
       <div className="flex items-center justify-between px-4 md:px-6 py-3">
         <div className="flex items-center gap-3">
-          <Link to="/" className="wire-border bg-[hsl(var(--wire-bg-soft))] px-3 py-1.5">
-            <span className="font-mono text-xs tracking-[0.15em]">[ LOGO ]</span>
+          <Link to="/" className="flex items-center gap-2 group">
+            <img
+              src={nexifyLogo}
+              alt="Nexify Studio Tech logo"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-contain group-hover:scale-105 transition-transform"
+            />
+            <span className="font-display font-bold text-sm tracking-tight hidden sm:inline">
+              NEXIFY <span className="font-light italic text-primary">studio</span>
+            </span>
           </Link>
-          <span className="hidden md:inline font-mono text-[10px] text-muted-foreground tracking-[0.2em]">
-            v1.0 · WIREFRAME
+          <span className="hidden lg:inline font-mono text-[10px] text-muted-foreground tracking-[0.2em]">
+            v1.0 · GUARD
           </span>
         </div>
 

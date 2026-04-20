@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import nexifyLogo from "@/assets/nexify-logo.png";
 
 const columns = [
   {
@@ -34,8 +35,17 @@ export const WireFooter = () => (
   <footer className="mt-28 pt-10 border-t-[1.5px] border-dashed border-[hsl(var(--wire-line-strong))]">
     <div className="grid md:grid-cols-[2fr_1fr_1fr_1fr] gap-10 mb-10">
       <div>
-        <Link to="/" className="wire-border-solid inline-block px-3 py-1.5 mb-4">
-          <span className="font-mono text-xs tracking-[0.15em]">[ LOGO ]</span>
+        <Link to="/" className="inline-flex items-center gap-2 mb-4 group">
+          <img
+            src={nexifyLogo}
+            alt="Nexify Studio Tech logo"
+            width={44}
+            height={44}
+            className="w-11 h-11 object-contain group-hover:scale-105 transition-transform"
+          />
+          <span className="font-display font-bold text-base tracking-tight">
+            NEXIFY <span className="font-light italic text-primary">studio</span>
+          </span>
         </Link>
         <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
           Nezávislý cybersec butik pre slovenské a české firmy. Audit, pentest, hardening, monitoring a incident response pre tímy, ktoré radšej investujú do obrany než do neskorého ľutovania.
