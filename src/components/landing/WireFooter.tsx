@@ -39,7 +39,7 @@ export const WireFooter = () => (
           <img
             src={nexifyLogo}
             alt="Nexify Guard logo"
-            className="h-36 w-auto object-contain group-hover:scale-105 transition-transform"
+            className="h-36 w-auto object-contain group-hover:scale-105 transition-transform [filter:drop-shadow(0_2px_6px_hsl(var(--foreground)/0.18))]"
           />
         </Link>
         <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
