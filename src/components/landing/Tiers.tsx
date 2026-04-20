@@ -9,7 +9,7 @@ const tiers = [
     price: "249",
     note: "jednorazovo · bez DPH",
     cta: "Objednať Strážneho",
-    promise: "Spíte pokojne, lebo váš web má základnú ochranu pred 90 % bežných útokov.",
+    promise: "Pokojný spánok je lacnejší, keď stojí 249 € a nie obnovu po prieniku.",
     features: [
       "Audit prístupových logov za posledných 7 dní",
       "Hardening WordPressu (heslá, prihlasovanie, xmlrpc)",
@@ -27,7 +27,7 @@ const tiers = [
     note: "jednorazovo · bez DPH",
     cta: "Objednať Ochrancu",
     popular: true,
-    promise: "Šetríte 5 000 – 50 000 € ročne na možných výpadkoch a incidentoch.",
+    promise: "Lacnejšie než incident. Oveľa menej trápne než vysvetľovať klientom, prečo im nefunguje checkout.",
     features: [
       "Všetko z balíka Strážny",
       "Pentest aplikácie — top 10 najčastejších útokov",
@@ -46,7 +46,7 @@ const tiers = [
     price: "3 890",
     note: "jednorazovo + mesačný paušál · bez DPH",
     cta: "Objednať Telochrancu",
-    promise: "Vyhnete sa nočnej more typu „padol nám eshop v Čierny piatok“.",
+    promise: "Keď váš systém živí firmu, nemá byť chránený na úrovni „snáď to vydrží".",
     features: [
       "Všetko z balíka Ochranca",
       "Hĺbkový pentest — black/grey box, API útoky",
@@ -66,10 +66,10 @@ export const Tiers = () => (
     <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
       <div>
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Tri úrovne <span className="italic font-light text-primary">ochrany</span>
+          Tri úrovne <span className="italic font-light text-primary">ochrany</span>. Bez hmly, bez kúziel, bez prekvapení na faktúre.
         </h2>
         <p className="mt-3 text-muted-foreground max-w-2xl text-sm md:text-base leading-relaxed">
-          Od jednorazového auditu pre živnostníkov až po kontinuálny retainer pre enterprise klientov. Každý balík je samostatne objednateľný.
+          Nie každý projekt potrebuje pevnosť. Niekedy stačí zamknúť dvere a skontrolovať okná. Niekedy už ale nestačí nič menšie než poriadna obrana, monitoring a plán, čo robiť, keď veci začnú horieť.
         </p>
       </div>
       <div className="hidden md:flex items-center gap-2">

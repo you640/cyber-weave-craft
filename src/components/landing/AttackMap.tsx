@@ -24,14 +24,18 @@ export const AttackMap = () => {
       <SectionMarker num="09" label="CYBER OPERATIONS CENTER" />
 
       <div className="flex items-end justify-between flex-wrap gap-4 mb-6">
-        <div>
+        <div className="max-w-2xl">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Live mapa útokov · práve teraz
+            Takto vyzerá <span className="italic font-light text-primary">noc na internete</span>
           </h2>
-          <p className="text-muted-foreground mt-2 max-w-2xl">
-            Toto vidíme my v dispečingu každý deň. Každá bodka = niekto sa pokúsil
-            dostať do webu nášho klienta. Každý riadok dolu = zablokovaný pokus.
-            Stream beží zo servera, nie z tvojho prehliadača.
+          <p className="text-muted-foreground mt-3 leading-relaxed">
+            Kým väčšina ľudí spí, niekde práve beží brute-force, niekde scraping, niekde pokus o SQL injection a niekde sa bot tvári ako zákazník s veľmi čudným vkusom na URL parametre.
+          </p>
+          <p className="text-muted-foreground mt-3 leading-relaxed">
+            Táto mapa nie je dekorácia. Je to pripomienka, že internet je otvorené mesto a brána bez stráže je len pozvánka napísaná pekným fontom.
+          </p>
+          <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+            Každá bodka je pokus. Každý riadok v logu je príbeh, ktorý sa našťastie neskončil incident reportom. Stream ide zo servera. Drámu netvoríme — internet ju ochotne dodáva sám.
           </p>
         </div>
         <WireAnnotation rotate={-3} className="text-xl">

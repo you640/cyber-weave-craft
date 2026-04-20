@@ -5,34 +5,34 @@ const pillars = [
     code: "G_01",
     icon: "👁",
     title: "Pozeráme sa stále",
-    body: "24 hodín denne sledujeme prístupy na váš web. Vidíme každú podozrivú IP adresu, každý pokus o heslo, každú chybu servera — aj o tretej ráno cez sviatky.",
+    body: "Sledujeme prístupy na váš web, administráciu, formuláre, API aj správanie servera. Vidíme podozrivé IP adresy, neobvyklé login pokusy, chyby aplikácie aj zvláštne requesty, ktoré slušný používateľ jednoducho neposiela.",
   },
   {
     code: "G_02",
     icon: "🚨",
-    title: "Alarmujeme okamžite",
-    body: "Keď sa niečo deje — útok, výpadok, podozrivá aktivita — dostanete notifikáciu na telefón do 60 sekúnd. Nie ráno. Nie zajtra. Hneď.",
+    title: "Alarmujeme hneď",
+    body: "Keď sa niečo deje, nedozviete sa to ráno pri káve. Dostanete upozornenie vtedy, keď má zmysel konať — nie keď už škoda stihla pohodlne zaparkovať.",
   },
   {
     code: "G_03",
     icon: "🛡",
-    title: "Blokujeme útoky",
-    body: "Botnety, skúšanie hesiel, scrapery, DDoS záplavy — všetko zastavíme automaticky. Vy len v týždennom reporte vidíte, koľko útokov sme odrazili.",
+    title: "Brzdíme útoky",
+    body: "Brute-force, scraping, credential stuffing, podozrivé payloady, DDoS šum aj lacné pokusy o prienik. Čo sa dá zastaviť automaticky, zastavíme. Čo potrebuje ľudský zásah, eskalujeme bez divadla a bez hrdinských monológov.",
   },
   {
     code: "G_04",
     icon: "🚑",
-    title: "Zachraňujeme keď treba",
-    body: "Hacknutý web? Vymazaná databáza? Volajte hocikedy. Sme na drôte do 4 hodín — aj cez víkend, aj cez Vianoce, aj keď vy spíte.",
+    title: "Keď horí, hasíme",
+    body: "Ak dôjde ku kompromitácii, výpadku alebo incidentu, neriešime powerpoint. Riešime triáž, izoláciu, obnovu, dôkazy a ďalšie kroky. Pretože v kríze je najhorší ten človek, ktorý veľa rozpráva a nič nevypína.",
   },
 ];
 
 const targets = [
-  "Eshopy (Shopify, WooCommerce, vlastné riešenia)",
-  "Firemné weby s formulármi a citlivými dátami",
+  "eshopy na Shopify, WooCommerce aj custom riešeniach",
+  "firemné weby s formulármi, databázami a citlivými dátami",
   "SaaS aplikácie a API",
-  "Booking / rezervačné systémy",
-  "Akýkoľvek web kde výpadok = strata peňazí",
+  "booking a rezervačné systémy",
+  "akýkoľvek projekt, kde výpadok = problém v peniazoch",
 ];
 
 export const Guard = () => (
@@ -42,10 +42,13 @@ export const Guard = () => (
     <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
       <div className="max-w-3xl">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Ako vyzerá <span className="italic font-light text-primary">strážna služba</span> pre digitálny biznis
+          Digitálna <span className="italic font-light text-primary">strážna služba</span> pre biznis, ktorý nemá čas na paniku
         </h2>
         <p className="mt-4 text-muted-foreground text-base md:text-lg leading-relaxed">
-          To, čo SBS robí pre kamenný obchod, my robíme pre ten online — len rýchlejšie, presnejšie a bez uniformy. Štyri jednoduché veci, 365 dní v roku.
+          Kamenný obchod má alarm, kameru a pult centrálnej ochrany. Online biznis potrebuje to isté — len namiesto dverí sledujeme endpointy, namiesto výkladu API a namiesto podozrivého pohybu logy, requesty a anomálie.
+        </p>
+        <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
+          Nie je to romantika. Je to disciplína. A disciplína býva lacnejšia než incident.
         </p>
       </div>
       <div className="hidden md:block">
@@ -74,9 +77,12 @@ export const Guard = () => (
         // pre koho
       </div>
       <div>
-        <h3 className="text-xl md:text-2xl font-bold tracking-tight mb-4">
-          Pre koho je strážna služba
+        <h3 className="text-xl md:text-2xl font-bold tracking-tight mb-2">
+          Pre koho má zmysel mať stráž
         </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+          Táto služba nie je pre každého. Je pre tých, ktorí vedia, že web nie je vizitka, ale prevádzka.
+        </p>
         <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2.5">
           {targets.map((t) => (
             <li key={t} className="flex gap-3 text-sm leading-snug">
@@ -86,7 +92,7 @@ export const Guard = () => (
           ))}
         </ul>
         <p className="mt-5 text-xs font-mono text-muted-foreground tracking-wider">
-          // chránime eshopy s obratom od 10 000 € po 5 000 000 € ročne
+          // chránime firmy od menších webov až po prevádzky, kde sa chyba nevolá „bug", ale „mesačný problém vo výsledovke"
         </p>
       </div>
     </div>

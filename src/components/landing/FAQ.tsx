@@ -47,10 +47,13 @@ const faqs = [
 export const FAQ = () => (
   <section id="faq" className="mt-28 scroll-mt-24">
     <SectionMarker num="05" label="Časté otázky" />
-    <div className="mb-10">
+    <div className="mb-10 max-w-3xl">
       <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-        FAQ — <span className="italic font-light text-primary">priamo a bez kecov</span>
+        FAQ — <span className="italic font-light text-primary">priamo, vecne, bez omáčky</span>
       </h2>
+      <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
+        Bez dymovej clony. Bez sales poézie. Bez toho, aby vám niekto vysvetľoval, že incident je vlastne príležitosť. Nie je. Je to incident.
+      </p>
     </div>
 
     <div className="grid lg:grid-cols-[1fr_2fr] gap-10">

@@ -17,10 +17,10 @@ export const AddonsTable = () => (
     <SectionMarker num="03" label="Doplnky" />
     <div className="mb-10">
       <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-        Add-on <span className="italic font-light text-primary">služby</span>
+        Samostatné <span className="italic font-light text-primary">moduly</span> pre konkrétne problémy
       </h2>
-      <p className="mt-3 text-muted-foreground max-w-2xl text-sm md:text-base">
-        Pridané služby k hlavným balíkom. Objednávateľné samostatne alebo ako rozšírenie tieru.
+      <p className="mt-3 text-muted-foreground max-w-2xl text-sm md:text-base leading-relaxed">
+        Niektoré firmy nepotrebujú celý balík. Potrebujú vyriešiť jednu slabinu skôr, než si ju všimne ešte niekto ďalší — bez povinnej kúpy polovičky tanku.
       </p>
     </div>
 

@@ -26,11 +26,13 @@ export const Partner = () => (
     <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
       <div className="max-w-2xl">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Prečo <span className="italic font-light text-primary">práve my</span>
+          Bezpečnosť stojí lepšie na <span className="italic font-light text-primary">silnej architektúre</span>
         </h2>
         <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
-          Za našou bezpečnosťou stojí partner pre enterprise-level vývoj. Spolupracujeme s ľuďmi,
-          ktorí stavajú softvér pre veľkých — a tú istú latku držíme aj my.
+          Za Nexify Guard nestojí len monitoring a alerty, ale aj technologické zázemie ľudí, ktorí rozumejú enterprise vývoju, architektúre a dlhodobo udržateľným systémom.
+        </p>
+        <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
+          Inými slovami: nelepíme náplasť na deravú stenu a netvárime sa, že je to stratégia. Keď sa má niečo opraviť, opraví sa to tak, aby to dávalo zmysel aj o rok, nielen do ďalšieho deployu.
         </p>
       </div>
       <div className="hidden md:block">
@@ -109,7 +111,7 @@ export const Partner = () => (
 
           <div className="mt-6 pt-4 border-t border-dashed border-[hsl(var(--wire-line))] flex items-center justify-between gap-3 flex-wrap">
             <div className="font-mono text-[11px] text-muted-foreground tracking-wider">
-              // bezpečnosť × enterprise vývoj = systém, ktorý vydrží
+              // bezpečnosť × architektúra = systém, ktorý vydrží aj pod tlakom
             </div>
             <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-primary">
               ● ACTIVE PARTNERSHIP

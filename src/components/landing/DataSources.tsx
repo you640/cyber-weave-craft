@@ -41,13 +41,13 @@ export const DataSources = () => (
 
     <div className="mb-10 max-w-3xl">
       <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-        Z čoho čerpáme <span className="italic font-light text-primary">dáta</span>
+        Neveštíme z kryštálu. Pracujeme s <span className="italic font-light text-primary">dátami</span>.
       </h2>
       <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
-        Naše bezpečnostné analýzy a skeny sú založené čiastočne na dátach z NVD (NIST), ktoré
-        poskytujú štandardizované informácie o zraniteľnostiach a ich hodnotení. NVD používame
-        ako referenčný zdroj — výsledné hodnotenie kombinujeme s internými dátami a lokálnym
-        overením.
+        Naše analýzy nestoja na dojmoch, ale na kombinácii referenčných bezpečnostných zdrojov, interných signálov a reálneho overenia vo vašom prostredí.
+      </p>
+      <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
+        NVD/NIST, MITRE ATT&amp;CK, CISA KEV a EPSS pre nás nie sú ozdoby do prezentácie. Sú to orientačné body, podľa ktorých vieme rýchlejšie rozlíšiť, čo je teoretická zraniteľnosť a čo je problém, ktorý si treba všimnúť skôr než útočník.
       </p>
     </div>
 
@@ -81,7 +81,7 @@ export const DataSources = () => (
     </div>
 
     <p className="mt-6 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
-      [ public reference data · no client PII transmitted ]
+      [ public reference data · bez prenosu klientskych PII ]
     </p>
   </section>
 );

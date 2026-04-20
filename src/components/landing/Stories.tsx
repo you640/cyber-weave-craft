@@ -4,23 +4,23 @@ const stories = [
   {
     code: "CASE_01",
     title: "Eshop s kozmetikou",
-    when: "piatok · 23:47",
-    body: "Botnet zo 4 000 IP adries skúšal prelomiť admin účet. Naše alarmy zacvičili o 23:48. O 23:51 boli všetky IP adresy zablokované. Klient sa o útoku dozvedel ráno z reportu.",
-    outcome: "Nestratil ani jednu objednávku.",
+    when: "piatok · neskoro večer",
+    body: "Prišla vlna login pokusov z tisícok adries. Nie zákazníci. Len internet vo svojej menej civilizovanej forme. Alarm sa ozval v minútach, nie hodinách. Bloky sa nasadili skôr, než sa niekto dostal hlbšie. Klient sa ráno zobudil do normálne fungujúceho eshopu a reportu, nie do krízového telefonátu.",
+    outcome: "Prevádzka pokračovala. Objednávky tiež.",
   },
   {
     code: "CASE_02",
     title: "B2B portál",
-    when: "utorok · 9:14",
-    body: "Bývalý zamestnanec sa skúsil prihlásiť starým heslom z neznámej krajiny. Detekovali sme to za 6 sekúnd, zablokovali účet a upozornili majiteľa firmy telefonicky.",
-    outcome: "Odhadovaná škoda v ukradnutých kontaktoch: 80 000 €.",
+    when: "utorok · ráno",
+    body: "Staré heslo, nový pokus, cudzia krajina, nesprávny čas. Klasika. Smutná, ale klasika. Prístup sme zastavili okamžite, účet uzamkli, vlastníka kontaktovali a ďalej už nasledovala prevencia, nie škoda.",
+    outcome: "Dáta ostali tam, kde mali. A bývalý zamestnanec si o pár minút neskôr zrejme uvedomil, že tentoraz to nebolo také jednoduché.",
   },
   {
     code: "CASE_03",
     title: "Rezervačný systém",
     when: "nedeľa · 4:33",
-    body: "Server spadol pre chybu v automatickom update. Telefonát klientovi o 4:35, oprava hotová o 5:20. Bookovanie zase fungovalo skôr, než sa zobudil prvý hosť.",
-    outcome: "Žiadny zákazník si nič nevšimol.",
+    body: "Server sa rozhodol, že nedeľa o štvrtej ráno je ideálny čas na existenčnú krízu po update. My sme s tým nesúhlasili. Diagnostika, zásah, obnova služby. Skôr než sa zobudil prvý hosť, systém bežal.",
+    outcome: "Žiadna panika, žiadna verejná hanba, žiadne „prosím skúste to neskôr".",
   },
 ];
 
@@ -31,10 +31,10 @@ export const Stories = () => (
     <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
       <div className="max-w-2xl">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Z reálnych <span className="italic font-light text-primary">nocí v službe</span>
+          Príbehy, ktoré by vyzerali ako <span className="italic font-light text-primary">bájky</span>, keby neboli v logoch
         </h2>
         <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
-          Bez mien klientov, ale s reálnymi časmi a číslami. Takto vyzerá strážna služba v praxi.
+          Bez mien klientov. Bez zbytočnej drámy. Len reálne situácie, kde rozhodovali minúty, nie marketingové heslá.
         </p>
       </div>
       <div className="hidden md:block">

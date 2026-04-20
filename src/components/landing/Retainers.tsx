@@ -6,20 +6,20 @@ const retainers = [
     name: "Watch",
     tag: "Monitoring tier",
     price: "249",
-    desc: "Kontinuálny log monitoring, alerting pri podozrivej aktivite, mesačný report, e-mailová podpora. Ideálne pre SME s jedným webom.",
+    desc: "Pre menšie tímy a jeden web. Monitoring, alerting, mesačný report a pokojnejšie pondelky.",
   },
   {
     name: "Guard",
     tag: "Active defense",
     price: "690",
     featured: true,
-    desc: "Watch + aktívna reakcia na incidenty (4h SLA), WAF správa, kvartálny mini-audit, 4h konzultácií mesačne. Pre firmy 10–50 ľudí.",
+    desc: "Pre firmy, ktoré potrebujú aktívnu reakciu, správu WAF a pravidelný mini-audit. Nie teóriu. Prevádzkovú ochranu.",
   },
   {
     name: "Fortress",
     tag: "Full coverage",
     price: "1 890",
-    desc: "Guard + dedicated engineer, 24/7 incident response SLA (1h reakcia), mesačný pentest nových features, NIS2/ISO 27001 support.",
+    desc: "Pre projekty, kde je bezpečnosť súčasť biznisového modelu. Dedicated engineer, rýchla reakcia, pravidelný testing a podpora compliance.",
   },
 ];
 
@@ -29,10 +29,10 @@ export const Retainers = () => (
     <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
       <div>
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Mesačné <span className="italic font-light text-primary">paušály</span>
+          Audit je fotografia. Retainer je <span className="italic font-light text-primary">stráž</span>, ktorá zostala v službe.
         </h2>
-        <p className="mt-3 text-muted-foreground max-w-2xl text-sm md:text-base">
-          Pre firmy, ktoré chcú kontinuálnu ochranu a nie jednorazový audit. Monitoring, reakcia, kvartálne re-audity.
+        <p className="mt-3 text-muted-foreground max-w-2xl text-sm md:text-base leading-relaxed">
+          Jednorazový audit povie, v akom stave ste dnes. Retainer rieši, čo sa bude diať zajtra, o mesiac a počas ďalšieho release-u. Pre firmy, ktoré nechcú bezpečnosť riešiť iba vtedy, keď už je niekto vo vnútri.
         </p>
       </div>
       <WireAnnotation rotate={-2} className="hidden md:inline">cancel anytime ✕</WireAnnotation>
