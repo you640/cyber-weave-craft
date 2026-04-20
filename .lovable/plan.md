@@ -1,85 +1,53 @@
 
-Cieľ: pridať druhý admin-only panel s live terminálom popri existujúcom `/dashboard/shell`, ale bez priameho WebSocket pripojenia zo browsera a bez vystavenia secretov klientovi.
 
-1. Zachovať existujúci shell ako safe mode
-- Nechať `/dashboard/shell` bez zmien ako auditovaný allowlist terminál cez `vps-exec`.
-- Nový panel pridať samostatne, napr. `/dashboard/shell-live`, aby bolo jasné rozdelenie:
-  - Shell = bezpečný / auditovaný režim
-  - Shell Live = interaktívny live režim
+## Cieľ
+Prepísať landing page copy do nového hlasu — "Ezop pre CTO": pokojný, presný, dôveryhodný, obrazný, ale nie alarmistický. Zachovať wireframe estetiku, kódy sekcií (G_01, CASE_01, atď.) a celú štruktúru. Meníme **iba texty**, žiadne layout zmeny.
 
-2. Nepoužiť dodaný kód priamo
-- Návrh `TerminalPage` v aktuálnej podobe nenasadiť:
-  - je JSX-nekompletný,
-  - pripája sa priamo na `wss://shell.nexify-studio.tech`,
-  - nerieši bezpečný auth model,
-  - obchádza existujúci admin/auth/audit model,
-  - obsahuje klientský pattern, ktorý by mohol tlačiť citlivé údaje mimo backend guardu.
+## Súbory na úpravu
 
-3. Pridať nový live panel do dashboardu
-- Vytvoriť nový komponent panelu v dashboard štýle projektu.
-- Pridať route do `src/pages/Dashboard.tsx`.
-- Pridať položku do `AdminSidebar`.
-- Panel bude mať:
-  - stav spojenia,
-  - scrollovateľný live output,
-  - command input,
-  - reconnect / disconnect akcie,
-  - jasné označenie, že ide o live režim.
+1. **`src/components/landing/Hero.tsx`** — nový H1 "Váš web nemá zostať v noci bez stráže", subheadline o botoch, body copy, CTA, trust line, quick stats (Dohľad / Reakcia / Služba / Podpora s novými popismi).
 
-4. Navrhnúť server-side proxy vrstvu
-- Browser sa nebude pripájať priamo na VPS relay.
-- Namiesto toho vytvoriť backend funkciu/proxy, ktorá:
-  - overí session,
-  - overí admin rolu,
-  - použije runtime secrets iba na serveri,
-  - sprostredkuje komunikáciu k relay endpointu.
-- Ak backend runtime nepodporí plnohodnotný WS bridge ergonomicky, fallback bude streaming HTTP/SSE proxy, ale stále ako samostatný live panel.
+2. **`src/components/landing/Guard.tsx`** — nadpis "Digitálna strážna služba pre biznis, ktorý nemá čas na paniku", nové intro o kamennom obchode, prepísané 4 piliere G_01–G_04 (Pozeráme sa stále / Alarmujeme hneď / Brzdíme útoky / Keď horí, hasíme), nový "Pre koho má zmysel mať stráž" blok + highlight line.
 
-5. Zjednotiť bezpečnosť s existujúcim backend modelom
-- Zachovať admin-only prístup rovnako ako v `vps-exec`, `vps-diagnose`, `mcp-call`.
-- Neposielať `VPS_BASIC_USER`, `VPS_BASIC_PASS`, `VPS_SHARED_SECRET` do klienta.
-- Použiť existujúce secrets len na backend strane.
-- V UI zobraziť zrozumiteľné chybové stavy:
-  - unauthorized,
-  - forbidden,
-  - relay not configured,
-  - upstream unreachable,
-  - connection closed.
+3. **`src/components/landing/ThreatBanner.tsx`** — nahradiť "Každých 39 sekúnd" za nový text "Každý deň niekto skúša, čo nechal internet otvorené. Otázka neznie, či sa niekto pozrie aj na váš web. Otázka znie, či tam v tej chvíli už niekto stojí." + CTA "Spustiť dohľad →".
 
-6. Rozhodnúť sa pre audit správanie live panelu
-- Keďže live režim obchádza súčasný allowlist model, pri implementácii zachytiť aspoň:
-  - session start/end,
-  - odoslané príkazy,
-  - exit/error summary.
-- Tým sa live panel odlíši od safe shellu, ale nestratí sa minimálna audit stopa.
+4. **`src/components/landing/Tiers.tsx`** — nový nadpis "Tri úrovne ochrany. Bez hmly, bez kúziel, bez prekvapení na faktúre.", intro o pevnosti vs. zamknúť dvere, prepísané Strážny / Ochranca / Telochranca s pitch vetami.
 
-7. Upratať UX a texty
-- Jasne popísať rozdiel medzi panelmi v UI.
-- Pri live paneli pridať warning, že ide o power-user režim.
-- Zachovať vizuálny štýl dashboardu: wire-border, mono text, status labely, terminal layout.
+5. **`src/components/landing/AddonsTable.tsx`** — nadpis "Samostatné moduly pre konkrétne problémy" + nové intro (zachovať zoznam modulov).
 
-8. Overenie po implementácii
-- Otestovať admin route a sidebar navigáciu.
-- Otestovať pripojenie live panelu s korektne nastavenými secrets.
-- Otestovať chyby pri nedostupnom relay, zlom auth, a prerušení spojenia.
-- Porovnať, že pôvodný `/dashboard/shell` ostal funkčný.
-- Spraviť end-to-end test oboch režimov v preview.
+6. **`src/components/landing/WatchedThreats.tsx`** — nadpis "Nechytáme duchov. Chytáme konkrétne pokusy.", nové intro o hollywoodskom hackerovi, prepísané položky útokov (jemnejší, presnejší jazyk) a preventívnych problémov, jednorádok na konci.
 
-Technické detaily
-- Dotknuté súbory:
-  - `src/pages/Dashboard.tsx`
-  - `src/components/dashboard/AdminSidebar.tsx`
-  - nový panel komponent pre live shell
-  - pravdepodobne nová backend funkcia pre proxy režim
-- Bezpečnostná zásada:
-  - žiadne basic auth credentials v browser bundle,
-  - žiadne priame `new WebSocket("wss://...")` z klienta so secret-based prístupom,
-  - admin check musí zostať server-side.
-- Existujúce secrets už sú dostupné, takže netreba pýtať nové, iba ich použiť bezpečne.
-- Dodaný `TerminalPage` poslúži len ako UX inšpirácia, nie ako copy-paste implementácia.
+7. **`src/components/landing/DataSources.tsx`** — nadpis "Neveštíme z kryštálu. Pracujeme s dátami.", nové intro, microcopy "Public reference data · bez prenosu klientskych PII".
 
-Výsledok
-- V dashboarde budú dva terminály:
-  - bezpečný auditovaný shell,
-  - samostatný live shell cez server-side proxy.
-- Tým sa splní tvoj zámer “Pridať live panel” bez rozbitia aktuálnej bezpečnej architektúry.
+8. **`src/components/landing/Retainers.tsx`** — nadpis "Audit je fotografia. Retainer je stráž, ktorá zostala v službe.", nové intro, prepísané Watch / Guard / Fortress popisy (zachovať ceny).
+
+9. **`src/components/landing/Stories.tsx`** — nadpis "Príbehy, ktoré by vyzerali ako bájky, keby neboli v logoch", nové intro, prepísané CASE_01–03 (eshop kozmetika, B2B portál, rezervačný systém) s novým, pokojnejším jazykom a "Výsledok" riadkami.
+
+10. **`src/components/landing/Partner.tsx`** — nadpis "Bezpečnosť stojí lepšie na silnej architektúre", nový body copy + highlight "Bezpečnosť × architektúra = systém, ktorý vydrží aj pod tlakom".
+
+11. **`src/components/landing/FAQ.tsx`** — len intro nadpis "FAQ — priamo, vecne, bez omáčky" + nový intro text + CTA na e-mail (FAQ položky necháme tak, ako sú, ak nie sú v rozpore).
+
+12. **`src/components/landing/AttackMap.tsx`** (a/alebo subkomponenty) — nadpis "Takto vyzerá noc na internete", nové intro a supporting copy o "otvorenom meste".
+
+13. **`src/components/landing/GuardStatusBar.tsx`** — drobné textové úpravy (zachovať live počítadlo, len vyladiť labely podľa nového status bloku).
+
+14. **`src/components/landing/WireFooter.tsx`** — nový tagline "Nezávislý cybersec butik pre slovenské a české firmy. Audit, pentest, hardening, monitoring a incident response pre tímy, ktoré radšej investujú do obrany než do neskorého ľutovania."
+
+15. **`src/components/landing/WireNav.tsx`** — overiť eyebrow text "NEXIFY GUARD · 24/7 dohľad pre weby, eshopy a SaaS · SK / CZ · 2026" (ak je tam top bar).
+
+## Čo NEMENÍME
+- Layout, grid, wire-border štýly, farby, kódy sekcií (G_01, THR_01, CASE_01, SRC_01…).
+- Routing, edge functions, dashboard, shell-live.
+- Ceny v Retainers (249 / 690 / 1 890 €).
+- Štruktúru komponentov a props.
+
+## Poznámky k tónu
+- Vyhadzujeme: "39 sekúnd", "hacknutý každých X", emoji-driven alarm jazyk, "ráno z reportu", "80 000 €" konkrétne čísla v príbehoch.
+- Pridávame: pokojné metafory (kamenný obchod, otvorené mesto, fotografia vs. stráž), suchý humor ("daňový úrad", "technický folklór", "veľmi čudný vkus na URL parametre"), kratšie údery na konci sekcií.
+
+## Implementačné kroky
+1. Pre každý komponent prečítať aktuálny obsah a nahradiť iba textové reťazce v JSX (žiadne zmeny v štruktúre, importoch, props).
+2. Pri zoznamoch (`attacks`, `prevention`, `targets`, `stories`) prepísať položky v dátových konštantách hore v súbore.
+3. Pri Hero / Guard skontrolovať, že CTA odkazy (`#balíčky`, `#služby`) zostávajú funkčné.
+4. Spustiť preview a vizuálne overiť, že nikde nepretieklo (najmä subheadline v Hero a pitch vety v Tiers — sú dlhšie než pôvodné).
+
