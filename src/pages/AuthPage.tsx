@@ -100,7 +100,7 @@ const AuthPage = () => {
           <img
             src={nexifyLogo}
             alt="Nexify Guard logo"
-            className="h-10 w-auto object-contain mb-4"
+            className="h-32 w-auto object-contain mb-4"
           />
           <div className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground uppercase mb-3">
             // ACCESS · 10 · AUTHENTICATION GATEWAY
