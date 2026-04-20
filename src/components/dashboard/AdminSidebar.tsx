@@ -1,4 +1,4 @@
-import { LayoutGrid, Users, Activity, Terminal, Plug, Settings, HeartPulse, ShieldCheck, FileText } from "lucide-react";
+import { LayoutGrid, Users, Activity, Terminal, Plug, Settings, HeartPulse, ShieldCheck, FileText, Stethoscope } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -18,6 +18,7 @@ const items = [
   { title: "Health", url: "/dashboard/health", icon: HeartPulse, active: true },
   { title: "WP Audit", url: "/dashboard/wp-audit", icon: ShieldCheck, active: true },
   { title: "Reports", url: "/dashboard/reports", icon: FileText, active: true },
+  { title: "Diagnostics", url: "/dashboard/diagnostics", icon: Stethoscope, active: true },
   { title: "Shell", url: "/dashboard/shell", icon: Terminal, active: true },
   { title: "MCP", url: "/dashboard/mcp", icon: Plug, active: true },
   { title: "Users", url: "#", icon: Users, active: false },
