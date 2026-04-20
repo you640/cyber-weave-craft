@@ -38,7 +38,7 @@ export const WireFooter = () => (
           <span className="font-mono text-xs tracking-[0.15em]">[ LOGO ]</span>
         </Link>
         <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-          Nezávislý cybersec butik. Audit, pentest, incident response a retainery pre slovenské a české firmy.
+          Nezávislý cybersec butik pre slovenské a české firmy. Audit, pentest, hardening, monitoring a incident response pre tímy, ktoré radšej investujú do obrany než do neskorého ľutovania.
         </p>
       </div>
 

@@ -1,15 +1,17 @@
 export const ThreatBanner = () => (
   <section className="mt-20">
-    <div className="wire-border-solid bg-foreground text-background p-5 md:p-6 flex flex-wrap items-center justify-between gap-4">
-      <div className="flex items-center gap-4">
-        <span className="font-mono text-2xl text-primary leading-none">⚠</span>
+    <div className="wire-border-solid bg-foreground text-background p-5 md:p-6 flex flex-wrap items-center justify-between gap-6">
+      <div className="flex items-start gap-4 flex-1 min-w-[280px]">
+        <span className="font-mono text-2xl text-primary leading-none mt-1">⚠</span>
         <div>
-          <div className="font-mono text-[10px] tracking-[0.25em] uppercase text-background/60 mb-1">
+          <div className="font-mono text-[10px] tracking-[0.25em] uppercase text-background/60 mb-2">
             // global stat · 2026
           </div>
           <p className="text-base md:text-lg font-medium leading-snug">
-            Každých <span className="text-primary font-bold">39 sekúnd</span> je niekde na svete hacknutý jeden web.{" "}
-            <span className="text-background/70">Váš nemusí byť ďalší.</span>
+            Každý deň niekto skúša, čo nechal internet otvorené.{" "}
+            <span className="text-background/70">Otázka neznie, či sa niekto pozrie aj na váš web. Otázka znie, či tam v tej chvíli už </span>
+            <span className="text-primary font-bold">niekto stojí</span>
+            <span className="text-background/70">.</span>
           </p>
         </div>
       </div>
