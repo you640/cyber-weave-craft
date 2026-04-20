@@ -44,7 +44,7 @@ export const MfaPanel = () => {
       setPhase("enrolled");
     } else {
       // clean up any stray unverified factor
-      if (totp && totp.status === "unverified") {
+      if (totp && totpStatus !== "verified") {
         await supabase.auth.mfa.unenroll({ factorId: totp.id });
       }
       setFactor(null);
