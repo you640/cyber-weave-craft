@@ -14,6 +14,7 @@ import DpaPage from "./pages/DpaPage.tsx";
 import TermsPage from "./pages/TermsPage.tsx";
 import CookiesPage from "./pages/CookiesPage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import { AdminRoute } from "./components/auth/AdminRoute";
@@ -30,6 +31,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/auth/reset" element={<ResetPasswordPage />} />
             <Route
               path="/dashboard/*"
               element={
