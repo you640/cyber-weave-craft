@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { MfaBanner } from "@/components/dashboard/MfaBanner";
 
 interface Signup {
   id: string;
@@ -80,6 +81,8 @@ export const Overview = () => {
         </h1>
         <div className="border-t border-dashed border-border mt-4" />
       </div>
+
+      <MfaBanner />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Kpi label="Používatelia spolu" value={usersTotal} hint="profiles · all time" />

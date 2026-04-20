@@ -10,6 +10,7 @@ import { HealthPanel } from "@/components/dashboard/panels/HealthPanel";
 import { WpAuditPanel } from "@/components/dashboard/panels/WpAuditPanel";
 import { ReportsPanel } from "@/components/dashboard/panels/ReportsPanel";
 import { DiagnosticsPanel } from "@/components/dashboard/panels/DiagnosticsPanel";
+import { MfaPanel } from "@/components/dashboard/panels/MfaPanel";
 import { UserMenu } from "@/components/auth/UserMenu";
 import nexifyLogo from "@/assets/nexify-logo.png";
 
@@ -51,6 +52,7 @@ const Dashboard = () => {
               <Route path="mcp" element={<McpPanel />} />
               <Route path="shell" element={<ShellPanel />} />
               <Route path="shell-live" element={<ShellLivePanel />} />
+              <Route path="mfa" element={<MfaPanel />} />
               <Route path="*" element={<Navigate to="." replace />} />
             </Routes>
           </main>
