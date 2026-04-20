@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { UserMenu } from "@/components/auth/UserMenu";
 import nexifyLogo from "@/assets/nexify-logo.png";
+import nexifyShield from "@/assets/nexify-shield.png";
 
 const landingLinks = [
   { label: "Strážna služba", href: "#strážna-služba" },
