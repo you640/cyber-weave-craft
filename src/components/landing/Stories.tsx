@@ -20,7 +20,7 @@ const stories = [
     title: "Rezervačný systém",
     when: "nedeľa · 4:33",
     body: "Server sa rozhodol, že nedeľa o štvrtej ráno je ideálny čas na existenčnú krízu po update. My sme s tým nesúhlasili. Diagnostika, zásah, obnova služby. Skôr než sa zobudil prvý hosť, systém bežal.",
-    outcome: "Žiadna panika, žiadna verejná hanba, žiadne „prosím skúste to neskôr".",
+    outcome: 'Žiadna panika, žiadna verejná hanba, žiadne „prosím skúste to neskôr".',
   },
 ];
 

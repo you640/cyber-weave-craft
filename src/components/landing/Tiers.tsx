@@ -46,7 +46,7 @@ const tiers = [
     price: "3 890",
     note: "jednorazovo + mesačný paušál · bez DPH",
     cta: "Objednať Telochrancu",
-    promise: "Keď váš systém živí firmu, nemá byť chránený na úrovni „snáď to vydrží".",
+    promise: 'Keď váš systém živí firmu, nemá byť chránený na úrovni „snáď to vydrží".',
     features: [
       "Všetko z balíka Ochranca",
       "Hĺbkový pentest — black/grey box, API útoky",
