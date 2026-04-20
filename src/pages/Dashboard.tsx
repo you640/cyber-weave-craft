@@ -5,6 +5,7 @@ import { AdminSidebar } from "@/components/dashboard/AdminSidebar";
 import { Overview } from "@/components/dashboard/panels/Overview";
 import { McpPanel } from "@/components/dashboard/panels/McpPanel";
 import { ShellPanel } from "@/components/dashboard/panels/ShellPanel";
+import { ShellLivePanel } from "@/components/dashboard/panels/ShellLivePanel";
 import { HealthPanel } from "@/components/dashboard/panels/HealthPanel";
 import { WpAuditPanel } from "@/components/dashboard/panels/WpAuditPanel";
 import { ReportsPanel } from "@/components/dashboard/panels/ReportsPanel";
