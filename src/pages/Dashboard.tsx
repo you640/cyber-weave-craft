@@ -30,7 +30,7 @@ const Dashboard = () => {
               <img
                 src={nexifyLogo}
                 alt="Nexify Guard logo"
-                className="h-7 w-auto object-contain group-hover:scale-105 transition-transform"
+                className="h-20 w-auto object-contain group-hover:scale-105 transition-transform"
               />
               <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground group-hover:text-foreground transition-colors">
                 ← exit
