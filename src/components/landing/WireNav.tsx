@@ -35,20 +35,12 @@ export const WireNav = () => {
         {/* LEFT: logo + status */}
         <div className="flex items-center gap-3 min-w-0">
           <Link to="/" className="flex items-center gap-2 group shrink-0">
-            <img
-              src={nexifyShield}
-              alt="Nexify Guard"
-              className={`md:hidden w-auto object-contain group-hover:scale-105 transition-all [filter:drop-shadow(0_4px_10px_hsl(var(--foreground)/0.4))] ${
-                scrolled ? "h-9" : "h-11"
-              }`}
-            />
-            <img
-              src={nexifyLogo}
-              alt="Nexify Guard logo"
-              className={`hidden md:block w-auto object-contain group-hover:scale-105 transition-all [filter:drop-shadow(0_6px_14px_hsl(var(--foreground)/0.45))_drop-shadow(0_2px_4px_hsl(var(--foreground)/0.3))] ${
-                scrolled ? "h-16" : "h-24"
-              }`}
-            />
+            <span className="font-mono text-lg font-bold tracking-tight text-foreground">
+              NEXIFY
+            </span>
+            <span className="font-mono text-lg font-light tracking-tight text-primary">
+              GUARD
+            </span>
           </Link>
           <div className="hidden xl:flex items-center gap-2 pl-3 border-l border-dashed border-foreground/30">
             <span className="relative flex h-2 w-2">
