@@ -66,6 +66,21 @@ export const DiagnosticsPanel = () => {
 
       {result && (
         <div className="space-y-4">
+          {/* All systems operational banner */}
+          {!result.fatal && result.steps.length > 0 && result.steps.every((s) => s.ok) && (
+            <div className="wire-border bg-primary/10 border-primary p-4 flex items-center gap-3">
+              <span className="font-mono text-primary text-lg">●</span>
+              <div>
+                <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-primary">
+                  // STATUS · OK
+                </div>
+                <div className="font-mono text-sm font-semibold text-primary mt-1">
+                  ALL SYSTEMS OPERATIONAL
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Config block */}
           <section className="wire-border bg-background/60 backdrop-blur-sm p-4">
             <div className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground uppercase mb-3">
