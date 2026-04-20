@@ -21,9 +21,14 @@ export const WireNav = () => {
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group">
             <img
+              src={nexifyShield}
+              alt="Nexify Guard"
+              className="h-12 w-auto object-contain md:hidden group-hover:scale-105 transition-transform [filter:drop-shadow(0_4px_10px_hsl(var(--foreground)/0.4))]"
+            />
+            <img
               src={nexifyLogo}
               alt="Nexify Guard logo"
-              className="h-28 w-auto object-contain group-hover:scale-105 transition-transform [filter:drop-shadow(0_6px_14px_hsl(var(--foreground)/0.45))_drop-shadow(0_2px_4px_hsl(var(--foreground)/0.3))]"
+              className="hidden md:block h-28 w-auto object-contain group-hover:scale-105 transition-transform [filter:drop-shadow(0_6px_14px_hsl(var(--foreground)/0.45))_drop-shadow(0_2px_4px_hsl(var(--foreground)/0.3))]"
             />
           </Link>
           <span className="hidden lg:inline font-mono text-[10px] text-muted-foreground tracking-[0.2em]">
