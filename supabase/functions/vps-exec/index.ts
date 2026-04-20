@@ -176,11 +176,12 @@ Deno.serve(async (req) => {
     clearTimeout(timeout);
 
     const durationMs = Date.now() - startedAt;
+    const rawBody = await bridgeRes.text();
     let payload: { exit_code?: number; stdout?: string; stderr?: string; duration_ms?: number } = {};
     try {
-      payload = await bridgeRes.json();
+      payload = rawBody ? JSON.parse(rawBody) : {};
     } catch {
-      payload = { stderr: await bridgeRes.text() };
+      payload = { stderr: rawBody };
     }
 
     const exitCode = typeof payload.exit_code === "number" ? payload.exit_code : (bridgeRes.ok ? 0 : -1);
