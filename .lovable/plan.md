@@ -1,57 +1,53 @@
 
-Najlepšie to použiť na 3 miestach, lebo každý text má inú úlohu:
 
-1. Landing / marketing
-- Použiť krátky text.
-- Najvhodnejšie miesto v tomto projekte je nová sekcia na homepage medzi `Services` a `WatchedThreats` alebo hneď pod `WatchedThreats`.
-- Cieľ: dôveryhodnosť a metodológia pre návštevníka.
-- Alternatíva: krátky riadok aj pod nadpisom v `src/components/landing/Services.tsx`.
+## Plán: Nexify Security Dashboard — Health, WP Audit, Reports
 
-2. About page
-- Použiť technickejšie znenie v skrátenej forme.
-- V `src/pages/AboutPage.tsx` doplniť samostatný blok „Metodológia“ alebo „Autoritatívne zdroje dát“.
-- Cieľ: vysvetliť, z čoho vychádza vaše hodnotenie zraniteľností.
+Užívateľ schválil: proxy cez `vps-exec`, wrapper scripty na VPS, plný rozsah 3 panelov, Caddy spravuje oba auth (proxy strip a re-add).
 
-3. Privacy / legal
-- Použiť formálny text.
-- Najvhodnejšie v `src/pages/PrivacyPage.tsx` ako nová sekcia o externých zdrojoch vulnerability dát.
-- Dáva zmysel uviesť, že ide o verejný referenčný zdroj a že sa tam neposielajú osobné údaje klientov.
-- Do `src/pages/TermsPage.tsx` by som dal len krátku vetu, nie celý blok.
+### Architektúra
 
-Odporúčaný minimálny rozsah teraz
-- `Index.tsx` + nová landing sekcia „Data Sources“
-- `AboutPage.tsx` + metodológia
-- `PrivacyPage.tsx` + formálna sekcia o NVD/NIST
+```text
+Browser (admin) → vps-exec edge fn → Caddy (Basic Auth) → bridge (Bearer) → wrapper script
+                  ↑ overí admin rolu   ↑ pridá Basic     ↑ pridá Bearer    ↑ vráti JSON/text
+                  ↑ allowlist          ↑ strip+re-add Authorization
+```
 
-Ako rozdeliť tvoje 3 texty
-- Krátky text: homepage / produktové bloky
-- Technická poznámka: About / metodológia / budúce reporty
-- Formálny text: Privacy page, prípadne DPA alebo Terms len ako stručná zmienka
+Keďže Caddy spraví Basic Auth check a potom strip+re-add Authorization, edge fn pošle **iba** `Authorization: Bearer <SHARED_SECRET>` na Caddy. Caddy overí Basic (s creds vloženými do URL alebo cez druhý mechanizmus — v Caddyfile snippete), strip Authorization, re-add Bearer dovnútra k bridgeu. Edge fn teda nepotrebuje Basic Auth secret.
 
-Čo by som zatiaľ nedával
-- DPA: len ak naozaj potrebujete zmluvne riešiť externé zdroje používané pri analýzach; inak je to skôr zbytočne ťažké právne znenie.
-- Dashboard Overview: až keď tam bude reálny NVD sync, cache alebo telemetry stav; zatiaľ by to pôsobilo ako placeholder.
+→ **Treba len jeden secret**: `VPS_BRIDGE_URL` a `VPS_SHARED_SECRET` (oba už existujú podľa predchádzajúcich krokov). Žiadny nový secret.
 
-Implementačný plán
-1. Pridať novú sekciu na landing page s krátkym textom o NVD/NIST.
-2. Doplniť na About page metodologický blok s technickou verziou textu.
-3. Pridať do Privacy page formálnu sekciu o použití NVD ako verejného zdroja.
-4. Voliteľne doplniť jednu vetu do Terms page o používaní autoritatívnych vulnerability zdrojov.
+### Zmeny v kóde
 
-Technické detaily
-- Nový komponent napr. `src/components/landing/DataSources.tsx`
-- Zapojenie do `src/pages/Index.tsx`
-- Úprava `src/pages/AboutPage.tsx`
-- Úprava `src/pages/PrivacyPage.tsx`
-- Voliteľne úprava `src/pages/TermsPage.tsx`
+**1. `supabase/functions/vps-exec/index.ts`** — rozšíriť allowlist:
+- Pridať jednotokenové príkazy: `nexify-health`, `nexify-wp-audit-start`, `nexify-wp-audit-status`, `nexify-list-reports`, `nexify-latest-report`
+- Žiadna zmena auth logiky (Caddy to vyrieši)
 
-Obsahovo odporúčam doplniť ešte jednu dôležitú vetu
-- že NVD používate ako referenčný zdroj na obohatenie a koreláciu,
-- ale výsledné hodnotenie nevychádza výlučne z NVD, skôr z kombinácie NVD + interných dát + lokálneho overenia.
-To je vhodné hlavne do About a reportov.
+**2. Nové dashboard panely**:
+- `src/components/dashboard/panels/HealthPanel.tsx` — auto-refresh 10s, parsuje výstup `nexify-health` (CPU load, RAM used/total, disk used/total), brutalist karty s `wire-border` + glassmorphism `backdrop-blur-sm bg-background/60`
+- `src/components/dashboard/panels/WpAuditPanel.tsx` — tlačidlo "RUN ENTERPRISE AUDIT" (`nexify-wp-audit-start`), status pill (`nexify-wp-audit-status`, refresh 5s), toast feedback, posledný journal output v `<pre>`
+- `src/components/dashboard/panels/ReportsPanel.tsx` — sidebar so zoznamom (`nexify-list-reports`), default load `nexify-latest-report`, JSON parse → tabuľka CVE / CVSS badge (zelená <4 / oranžová 4-7 / červená ≥7) / CWE / popis / odkaz na NVD; raw JSON toggle
 
-Ak to schváliš, v ďalšom kroku by som pripravil presné umiestnenie a finálne texty pre:
-- homepage,
-- About,
-- Privacy,
-- a prípadne aj Terms.
+**3. `src/components/dashboard/AdminSidebar.tsx`** — nahradiť `active: false` u Users/Attack Feed/Settings (nedotýkam sa), pridať 3 nové aktívne položky: Health, WP Audit, Reports
+
+**4. `src/pages/Dashboard.tsx`** — pridať 3 nové routy: `/dashboard/health`, `/dashboard/wp-audit`, `/dashboard/reports`
+
+**5. Helper hook** `src/hooks/use-vps-exec.ts` — wrapper okolo `supabase.functions.invoke('vps-exec', { body: { command } })` s loading/error/data state, používaný všetkými 3 panelmi
+
+### VPS setup dokument
+
+Vygenerujem `/mnt/documents/nexify-vps-setup.md` s presným obsahom:
+- 5 wrapper scriptov pre `/usr/local/bin/`
+- Sudoers entry pre `execbridge`
+- ACL/group setup pre čítanie `/home/wp-audit/reports/`
+- Caddyfile snippet pre Authorization strip+re-add (na bridge endpoint `/exec`)
+- Reštart príkazy (`systemctl reload caddy`, `systemctl restart exec-bridge`)
+- Curl test príklady
+
+### Štýl
+
+Dodržím existujúci wireframe systém (`wire-border`, `wire-shadow`, `wire-dots`, `font-mono`, sekcia markery `// HEALTH · 12` atď.). CVSS badge použijú existujúce `bg-destructive` (červená) + nové utility triedy v rámci komponentu pre zelená/šedá. Žiadne nové fonty ani globálne tokens.
+
+### Po implementácii
+- Ty na VPS spustíš setup z `nexify-vps-setup.md`
+- E2E test: `/dashboard/health` (CPU/RAM zobrazenie) → `/dashboard/wp-audit` (klik Run) → `/dashboard/reports` (CVE tabuľka)
+
