@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { WireNav } from "@/components/landing/WireNav";
 import { WireFooter } from "@/components/landing/WireFooter";
 
-type Mode = "signin" | "signup";
+type Mode = "signin" | "signup" | "forgot";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -43,8 +43,29 @@ const AuthPage = () => {
 
   const handleEmail = async (e: FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
+    if (!email) return;
     setBusy(true);
+
+    if (mode === "forgot") {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset`,
+      });
+      if (error) {
+        toast.error("Nepodarilo sa odoslať email", { description: error.message });
+      } else {
+        toast.success("Email odoslaný", {
+          description: "Skontroluj schránku a klikni na link pre nastavenie nového hesla.",
+        });
+        setMode("signin");
+      }
+      setBusy(false);
+      return;
+    }
+
+    if (!password) {
+      setBusy(false);
+      return;
+    }
 
     if (mode === "signup") {
       const { error } = await supabase.auth.signUp({
@@ -122,7 +143,7 @@ const AuthPage = () => {
             {/* Right auth card */}
             <section className="md:col-span-7 wire-border bg-background p-6 md:p-8 wire-shadow">
               <div className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase mb-6">
-                {mode === "signin" ? "// SIGN-IN" : "// SIGN-UP"}
+                {mode === "signin" ? "// SIGN-IN" : mode === "signup" ? "// SIGN-UP" : "// PASSWORD RESET"}
               </div>
 
               <div className="space-y-3 mb-6">
@@ -167,21 +188,35 @@ const AuthPage = () => {
                     placeholder="ty@firma.sk"
                   />
                 </div>
-                <div>
-                  <label className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase block mb-2">
-                    Heslo
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    minLength={8}
-                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full font-mono text-sm px-3 py-2.5 wire-border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="min. 8 znakov"
-                  />
-                </div>
+                {mode !== "forgot" && (
+                  <div>
+                    <label className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase block mb-2">
+                      Heslo
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      minLength={8}
+                      autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full font-mono text-sm px-3 py-2.5 wire-border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="min. 8 znakov"
+                    />
+                  </div>
+                )}
+
+                {mode === "signin" && (
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => setMode("forgot")}
+                      className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      Zabudnuté heslo?
+                    </button>
+                  </div>
+                )}
 
                 <button
                   type="submit"
@@ -189,23 +224,38 @@ const AuthPage = () => {
                   className="w-full font-mono text-sm px-4 py-3 bg-primary text-primary-foreground wire-shadow-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all flex items-center justify-between disabled:opacity-50"
                 >
                   <span>
-                    {busy ? "[ ... ]" : mode === "signin" ? "[ Prihlásiť sa ]" : "[ Vytvoriť účet ]"}
+                    {busy
+                      ? "[ ... ]"
+                      : mode === "signin"
+                        ? "[ Prihlásiť sa ]"
+                        : mode === "signup"
+                          ? "[ Vytvoriť účet ]"
+                          : "[ Poslať reset link ]"}
                   </span>
                   <span>→</span>
                 </button>
               </form>
 
               <div className="mt-6 pt-6 border-t border-dashed border-foreground/30 text-center">
-                <button
-                  onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-                  className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {mode === "signin" ? (
-                    <>Nemáš účet? <span className="text-primary underline">Zaregistruj sa</span></>
-                  ) : (
-                    <>Už máš účet? <span className="text-primary underline">Prihlás sa</span></>
-                  )}
-                </button>
+                {mode === "forgot" ? (
+                  <button
+                    onClick={() => setMode("signin")}
+                    className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    ← Späť na <span className="text-primary underline">prihlásenie</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+                    className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {mode === "signin" ? (
+                      <>Nemáš účet? <span className="text-primary underline">Zaregistruj sa</span></>
+                    ) : (
+                      <>Už máš účet? <span className="text-primary underline">Prihlás sa</span></>
+                    )}
+                  </button>
+                )}
               </div>
 
               <div className="mt-6 font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
