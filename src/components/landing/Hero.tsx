@@ -26,7 +26,7 @@ export const Hero = () => (
           zostať v noci
           <br />
           <span className="relative inline-block">
-            <span className="italic font-light text-primary">bez stráže.</span>
+            <span className="font-display italic font-light text-primary">bez stráže.</span>
             <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 300 8" preserveAspectRatio="none">
               <path d="M2 5 Q 75 1, 150 4 T 298 3" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" strokeLinecap="round" />
             </svg>

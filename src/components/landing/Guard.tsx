@@ -42,7 +42,7 @@ export const Guard = () => (
     <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
       <div className="max-w-3xl">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Digitálna <span className="italic font-light text-primary">strážna služba</span> pre biznis, ktorý nemá čas na paniku
+          Digitálna <span className="font-display italic font-light text-primary">strážna služba</span> pre biznis, ktorý nemá čas na paniku
         </h2>
         <p className="mt-4 text-muted-foreground text-base md:text-lg leading-relaxed">
           Kamenný obchod má alarm, kameru a pult centrálnej ochrany. Online biznis potrebuje to isté — len namiesto dverí sledujeme endpointy, namiesto výkladu API a namiesto podozrivého pohybu logy, requesty a anomálie.

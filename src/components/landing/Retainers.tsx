@@ -29,7 +29,7 @@ export const Retainers = () => (
     <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
       <div>
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Audit je fotografia. Retainer je <span className="italic font-light text-primary">stráž</span>, ktorá zostala v službe.
+          Audit je fotografia. Retainer je <span className="font-display italic font-light text-primary">stráž</span>, ktorá zostala v službe.
         </h2>
         <p className="mt-3 text-muted-foreground max-w-2xl text-sm md:text-base leading-relaxed">
           Jednorazový audit povie, v akom stave ste dnes. Retainer rieši, čo sa bude diať zajtra, o mesiac a počas ďalšieho release-u. Pre firmy, ktoré nechcú bezpečnosť riešiť iba vtedy, keď už je niekto vo vnútri.

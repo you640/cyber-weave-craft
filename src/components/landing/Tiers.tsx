@@ -66,7 +66,7 @@ export const Tiers = () => (
     <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
       <div>
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Tri úrovne <span className="italic font-light text-primary">ochrany</span>. Bez hmly, bez kúziel, bez prekvapení na faktúre.
+          Tri úrovne <span className="font-display italic font-light text-primary">ochrany</span>. Bez hmly, bez kúziel, bez prekvapení na faktúre.
         </h2>
         <p className="mt-3 text-muted-foreground max-w-2xl text-sm md:text-base leading-relaxed">
           Nie každý projekt potrebuje pevnosť. Niekedy stačí zamknúť dvere a skontrolovať okná. Niekedy už ale nestačí nič menšie než poriadna obrana, monitoring a plán, čo robiť, keď veci začnú horieť.

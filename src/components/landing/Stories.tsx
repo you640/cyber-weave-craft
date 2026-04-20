@@ -31,7 +31,7 @@ export const Stories = () => (
     <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
       <div className="max-w-2xl">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Príbehy, ktoré by vyzerali ako <span className="italic font-light text-primary">bájky</span>, keby neboli v logoch
+          Príbehy, ktoré by vyzerali ako <span className="font-display italic font-light text-primary">bájky</span>, keby neboli v logoch
         </h2>
         <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
           Bez mien klientov. Bez zbytočnej drámy. Len reálne situácie, kde rozhodovali minúty, nie marketingové heslá.

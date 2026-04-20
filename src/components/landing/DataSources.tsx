@@ -41,7 +41,7 @@ export const DataSources = () => (
 
     <div className="mb-10 max-w-3xl">
       <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-        Neveštíme z kryštálu. Pracujeme s <span className="italic font-light text-primary">dátami</span>.
+        Neveštíme z kryštálu. Pracujeme s <span className="font-display italic font-light text-primary">dátami</span>.
       </h2>
       <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
         Naše analýzy nestoja na dojmoch, ale na kombinácii referenčných bezpečnostných zdrojov, interných signálov a reálneho overenia vo vašom prostredí.
