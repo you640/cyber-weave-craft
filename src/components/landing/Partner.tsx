@@ -26,7 +26,7 @@ export const Partner = () => (
     <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
       <div className="max-w-2xl">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Bezpečnosť stojí lepšie na <span className="italic font-light text-primary">silnej architektúre</span>
+          Bezpečnosť stojí lepšie na <span className="font-display italic font-light text-primary">silnej architektúre</span>
         </h2>
         <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
           Za Nexify Guard nestojí len monitoring a alerty, ale aj technologické zázemie ľudí, ktorí rozumejú enterprise vývoju, architektúre a dlhodobo udržateľným systémom.

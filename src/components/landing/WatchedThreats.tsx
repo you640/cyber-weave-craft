@@ -46,7 +46,7 @@ export const WatchedThreats = () => (
     <SectionMarker num="04" label="Sledované hrozby" />
     <div className="mb-10 max-w-3xl">
       <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-        Nechytáme duchov. Chytáme <span className="italic font-light text-primary">konkrétne pokusy</span>.
+        Nechytáme duchov. Chytáme <span className="font-display italic font-light text-primary">konkrétne pokusy</span>.
       </h2>
       <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
         Väčšina útokov nevyzerá ako hollywoodsky hacker v kapucni. Vyzerá ako lacný skript, botnet, ukradnuté heslo, zraniteľný plugin a admin konto, ktoré sa už roky modlí namiesto používania 2FA.

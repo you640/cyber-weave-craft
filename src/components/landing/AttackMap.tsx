@@ -26,7 +26,7 @@ export const AttackMap = () => {
       <div className="flex items-end justify-between flex-wrap gap-4 mb-6">
         <div className="max-w-2xl">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Takto vyzerá <span className="italic font-light text-primary">noc na internete</span>
+            Takto vyzerá <span className="font-display italic font-light text-primary">noc na internete</span>
           </h2>
           <p className="text-muted-foreground mt-3 leading-relaxed">
             Kým väčšina ľudí spí, niekde práve beží brute-force, niekde scraping, niekde pokus o SQL injection a niekde sa bot tvári ako zákazník s veľmi čudným vkusom na URL parametre.
