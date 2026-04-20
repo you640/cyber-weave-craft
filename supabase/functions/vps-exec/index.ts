@@ -131,6 +131,8 @@ Deno.serve(async (req) => {
 
     const bridgeUrl = Deno.env.get("VPS_BRIDGE_URL");
     const bridgeSecret = Deno.env.get("VPS_SHARED_SECRET");
+    const basicUser = Deno.env.get("VPS_BASIC_USER");
+    const basicPass = Deno.env.get("VPS_BASIC_PASS");
     if (!bridgeUrl || !bridgeSecret) {
       return new Response(
         JSON.stringify({ error: "BRIDGE_NOT_CONFIGURED" }),
@@ -142,14 +144,23 @@ Deno.serve(async (req) => {
     const timeout = setTimeout(() => controller.abort(), 15000);
     const startedAt = Date.now();
 
+    // Auth strategy:
+    // - If Basic creds are set, use Basic on Authorization (Caddy basicauth requirement)
+    //   and pass Bearer via X-Bridge-Auth (bridge reads this header).
+    // - Otherwise, use Bearer on Authorization (assumes Caddy strips+re-adds).
+    const bridgeHeaders: Record<string, string> = { "Content-Type": "application/json" };
+    if (basicUser && basicPass) {
+      bridgeHeaders["Authorization"] = `Basic ${btoa(`${basicUser}:${basicPass}`)}`;
+      bridgeHeaders["X-Bridge-Auth"] = `Bearer ${bridgeSecret}`;
+    } else {
+      bridgeHeaders["Authorization"] = `Bearer ${bridgeSecret}`;
+    }
+
     let bridgeRes: Response;
     try {
       bridgeRes = await fetch(bridgeUrl, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${bridgeSecret}`,
-          "Content-Type": "application/json",
-        },
+        headers: bridgeHeaders,
         body: JSON.stringify({ command: command.trim() }),
         signal: controller.signal,
       });
