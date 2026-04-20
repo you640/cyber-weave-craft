@@ -83,6 +83,8 @@ export const Overview = () => {
       </div>
 
       <MfaBanner />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Kpi label="Používatelia spolu" value={usersTotal} hint="profiles · all time" />
         <Kpi label="Profily dnes" value={profilesToday} hint="signups · 24h" />
         <Kpi label="Útoky zablokované" value="—" hint="bridge offline" />
