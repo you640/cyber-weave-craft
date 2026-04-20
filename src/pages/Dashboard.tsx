@@ -45,6 +45,7 @@ const Dashboard = () => {
               <Route path="diagnostics" element={<DiagnosticsPanel />} />
               <Route path="mcp" element={<McpPanel />} />
               <Route path="shell" element={<ShellPanel />} />
+              <Route path="shell-live" element={<ShellLivePanel />} />
               <Route path="*" element={<Navigate to="." replace />} />
             </Routes>
           </main>
