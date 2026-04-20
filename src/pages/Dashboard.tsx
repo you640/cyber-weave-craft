@@ -5,6 +5,9 @@ import { AdminSidebar } from "@/components/dashboard/AdminSidebar";
 import { Overview } from "@/components/dashboard/panels/Overview";
 import { McpPanel } from "@/components/dashboard/panels/McpPanel";
 import { ShellPanel } from "@/components/dashboard/panels/ShellPanel";
+import { HealthPanel } from "@/components/dashboard/panels/HealthPanel";
+import { WpAuditPanel } from "@/components/dashboard/panels/WpAuditPanel";
+import { ReportsPanel } from "@/components/dashboard/panels/ReportsPanel";
 import { UserMenu } from "@/components/auth/UserMenu";
 
 const Dashboard = () => {
@@ -34,6 +37,9 @@ const Dashboard = () => {
           <main className="flex-1 px-4 md:px-8 py-8 max-w-6xl w-full">
             <Routes>
               <Route index element={<Overview />} />
+              <Route path="health" element={<HealthPanel />} />
+              <Route path="wp-audit" element={<WpAuditPanel />} />
+              <Route path="reports" element={<ReportsPanel />} />
               <Route path="mcp" element={<McpPanel />} />
               <Route path="shell" element={<ShellPanel />} />
               <Route path="*" element={<Navigate to="." replace />} />
