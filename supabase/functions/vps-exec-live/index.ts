@@ -127,6 +127,17 @@ Deno.serve(async (req) => {
       bridgeHeaders["Authorization"] = `Bearer ${bridgeSecret}`;
     }
 
+    // Diagnostic mode: ?diagnose=1 returns raw bridge response details
+    const url = new URL(req.url);
+    const diagnose = url.searchParams.get("diagnose") === "1";
+
+    console.log("[vps-exec-live] →", {
+      bridgeUrl,
+      authMode: basicUser && basicPass ? "basic+bearer" : "bearer",
+      command: command.trim(),
+      diagnose,
+    });
+
     let bridgeRes: Response;
     try {
       bridgeRes = await fetch(bridgeUrl, {
@@ -138,9 +149,10 @@ Deno.serve(async (req) => {
     } catch (e) {
       clearTimeout(timeout);
       const msg = e instanceof Error ? e.message : "bridge fetch failed";
+      console.error("[vps-exec-live] fetch threw:", msg);
       await logCommand(supabase, user.id, command, -1, `BRIDGE_ERROR: ${msg}`);
       return new Response(
-        JSON.stringify({ error: "UPSTREAM_UNREACHABLE", message: msg }),
+        JSON.stringify({ error: "UPSTREAM_UNREACHABLE", message: msg, bridgeUrl }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -148,10 +160,24 @@ Deno.serve(async (req) => {
 
     const durationMs = Date.now() - startedAt;
     const rawBody = await bridgeRes.text();
+    const respHeaders: Record<string, string> = {};
+    bridgeRes.headers.forEach((v, k) => { respHeaders[k] = v; });
+
+    console.log("[vps-exec-live] ← bridge response:", {
+      status: bridgeRes.status,
+      statusText: bridgeRes.statusText,
+      headers: respHeaders,
+      bodyLength: rawBody.length,
+      bodyPreview: rawBody.slice(0, 1000),
+      durationMs,
+    });
+
     let payload: { exit_code?: number; stdout?: string; stderr?: string; duration_ms?: number } = {};
+    let parseError: string | null = null;
     try {
       payload = rawBody ? JSON.parse(rawBody) : {};
-    } catch {
+    } catch (e) {
+      parseError = e instanceof Error ? e.message : "parse failed";
       payload = { stderr: rawBody };
     }
 
@@ -159,7 +185,28 @@ Deno.serve(async (req) => {
     const stdout = payload.stdout ?? "";
     const stderr = payload.stderr ?? "";
 
-    await logCommand(supabase, user.id, command, exitCode, stdout);
+    await logCommand(supabase, user.id, command, exitCode, stdout || stderr || `[empty raw=${rawBody.length}b]`);
+
+    if (diagnose) {
+      return new Response(
+        JSON.stringify({
+          diagnostic: true,
+          bridge: {
+            url: bridgeUrl,
+            status: bridgeRes.status,
+            statusText: bridgeRes.statusText,
+            headers: respHeaders,
+            raw_body: rawBody,
+            raw_body_length: rawBody.length,
+            parse_error: parseError,
+            parsed: payload,
+          },
+          auth_mode: basicUser && basicPass ? "basic+bearer" : "bearer",
+          duration_ms: durationMs,
+        }, null, 2),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     return new Response(
       JSON.stringify({
