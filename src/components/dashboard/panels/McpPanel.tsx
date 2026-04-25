@@ -235,6 +235,20 @@ export const McpPanel = () => {
         </div>
       )}
 
+      {status === "error" && /Nie si prihl/i.test(statusMsg) && (
+        <div className="wire-border wire-shadow bg-destructive/10 p-5 flex items-center justify-between gap-3 flex-wrap">
+          <div className="font-mono text-xs text-destructive">
+            [ AUTH ] Nie si prihlásený — prihlás sa znova, aby si mohol volať MCP.
+          </div>
+          <a
+            href="/auth"
+            className="font-mono text-[10px] tracking-[0.25em] uppercase text-foreground hover:text-primary"
+          >
+            [ prihlásiť sa → ]
+          </a>
+        </div>
+      )}
+
       {/* Tools list + request console */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <div className="wire-border wire-shadow bg-background lg:col-span-2">
