@@ -65,11 +65,16 @@ export const McpPanel = () => {
 
   const callMcp = useCallback(
     async (body: Record<string, unknown>) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw Object.assign(new Error("Nie si prihlásený — prihlás sa znova."), {
+          code: "NOT_AUTHENTICATED",
+        });
+      }
       const { data, error } = await supabase.functions.invoke("mcp-call", {
         body,
       });
       if (error) {
-        // Edge function returned non-2xx; surface message from data if present
         const msg =
           (data as { message?: string; error?: string } | null)?.message ??
           (data as { error?: string } | null)?.error ??
@@ -77,6 +82,12 @@ export const McpPanel = () => {
         const code = (data as { error?: string } | null)?.error;
         if (code === "MCP_NOT_CONFIGURED") {
           throw Object.assign(new Error(msg), { code });
+        }
+        if (code === "UPSTREAM_UNAVAILABLE" || /50[23]/.test(String(error.message ?? ""))) {
+          throw Object.assign(
+            new Error("MCP server dočasne nedostupný, skús znovu o chvíľu."),
+            { code: "UPSTREAM_UNAVAILABLE" },
+          );
         }
         throw new Error(msg);
       }
@@ -221,6 +232,20 @@ export const McpPanel = () => {
           <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground pt-2">
             Add them via Lovable Cloud → Secrets, then click [ re-probe ].
           </p>
+        </div>
+      )}
+
+      {status === "error" && /Nie si prihl/i.test(statusMsg) && (
+        <div className="wire-border wire-shadow bg-destructive/10 p-5 flex items-center justify-between gap-3 flex-wrap">
+          <div className="font-mono text-xs text-destructive">
+            [ AUTH ] Nie si prihlásený — prihlás sa znova, aby si mohol volať MCP.
+          </div>
+          <a
+            href="/auth"
+            className="font-mono text-[10px] tracking-[0.25em] uppercase text-foreground hover:text-primary"
+          >
+            [ prihlásiť sa → ]
+          </a>
         </div>
       )}
 

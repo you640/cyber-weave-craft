@@ -132,11 +132,18 @@ export const HealthPanel = () => {
         </Button>
       </div>
 
-      {error && (
+      {error === "NOT_AUTHENTICATED" ? (
+        <div className="wire-border p-4 bg-destructive/10 font-mono text-xs text-destructive flex items-center justify-between gap-3 flex-wrap">
+          <span>[ AUTH ] Nie si prihlásený — prihlás sa znova.</span>
+          <a href="/auth" className="underline hover:text-foreground tracking-[0.2em] uppercase text-[10px]">
+            [ prihlásiť sa → ]
+          </a>
+        </div>
+      ) : error ? (
         <div className="wire-border p-4 bg-destructive/10 font-mono text-xs text-destructive">
           [ ERROR ] {error}
         </div>
-      )}
+      ) : null}
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Metric

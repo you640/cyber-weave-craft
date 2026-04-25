@@ -1,10 +1,6 @@
+// deno-lint-ignore-file no-explicit-any
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { buildCorsHeaders, handlePreflight, withCors } from "../_shared/cors.ts";
 
 // Live shell: NO command allowlist (power-user mode), but still:
 //  - admin-only,
@@ -30,7 +26,7 @@ function validateLive(cmd: string): ValidationResult {
 }
 
 async function logCommand(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   adminId: string,
   command: string,
   exitCode: number,
@@ -48,10 +44,12 @@ async function logCommand(
   }
 }
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+Deno.serve((req) => withCors(req, async () => {
+  const pre = handlePreflight(req);
+  if (pre) return pre;
+  const corsHeaders = buildCorsHeaders(req);
 
-  try {
+  {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -219,11 +217,5 @@ Deno.serve(async (req) => {
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-  } catch (e) {
-    console.error("[vps-exec-live] unexpected", e);
-    return new Response(
-      JSON.stringify({ error: "Internal error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
   }
-});
+}));

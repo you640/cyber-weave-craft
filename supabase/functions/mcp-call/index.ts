@@ -1,34 +1,38 @@
 // MCP proxy edge function — Streamable HTTP transport
-// Forwards JSON-RPC payloads to a self-hosted MCP server (e.g. on the user's VPS)
+// Forwards JSON-RPC payloads to a self-hosted MCP server.
 // Admin-only: validates JWT + checks user_roles.admin via has_role RPC.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { buildCorsHeaders, handlePreflight, json, withCors } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const UPSTREAM_TIMEOUT_MS = 25000;
+const RETRY_BACKOFF_MS = 500;
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+async function upstreamFetchOnce(
+  url: string,
+  headers: Record<string, string>,
+  body: string,
+  timeoutMs: number,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { method: "POST", headers, body, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
   }
-  if (req.method !== "POST") {
-    return json({ error: "Method not allowed" }, 405);
-  }
+}
+
+Deno.serve((req) => withCors(req, async () => {
+  const pre = handlePreflight(req);
+  if (pre) return pre;
+
+  if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   // --- Auth: require logged-in admin ---
   const authHeader = req.headers.get("Authorization") ?? "";
   const token = authHeader.replace(/^Bearer\s+/i, "");
-  if (!token) return json({ error: "Missing Authorization bearer token" }, 401);
+  if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -36,31 +40,24 @@ Deno.serve(async (req) => {
     global: { headers: { Authorization: `Bearer ${token}` } },
   });
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError || !user) return json({ error: "Invalid session" }, 401);
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return json(req, { error: "Invalid session" }, 401);
 
   const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
     _user_id: user.id,
     _role: "admin",
   });
-  if (roleError) return json({ error: "Role check failed" }, 500);
-  if (!isAdmin) return json({ error: "Forbidden — admin only" }, 403);
+  if (roleError) return json(req, { error: "Role check failed" }, 500);
+  if (!isAdmin) return json(req, { error: "Forbidden — admin only" }, 403);
 
-  // --- Config check ---
+  // --- Config ---
   const MCP_SERVER_URL = Deno.env.get("MCP_SERVER_URL");
   const MCP_SERVER_TOKEN = Deno.env.get("MCP_SERVER_TOKEN");
   if (!MCP_SERVER_URL) {
-    return json(
-      {
-        error: "MCP_NOT_CONFIGURED",
-        message:
-          "MCP_SERVER_URL secret is not set. Add it in Lovable Cloud → Secrets.",
-      },
-      503,
-    );
+    return json(req, {
+      error: "MCP_NOT_CONFIGURED",
+      message: "MCP_SERVER_URL secret is not set. Add it in Lovable Cloud → Secrets.",
+    }, 503);
   }
 
   // --- Parse JSON-RPC body ---
@@ -68,10 +65,10 @@ Deno.serve(async (req) => {
   try {
     payload = await req.json();
   } catch {
-    return json({ error: "Invalid JSON body" }, 400);
+    return json(req, { error: "Invalid JSON body" }, 400);
   }
+  const payloadBody = JSON.stringify(payload);
 
-  // --- Forward to MCP server (Streamable HTTP requires both Accept types) ---
   const upstreamHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     Accept: "application/json, text/event-stream",
@@ -80,30 +77,42 @@ Deno.serve(async (req) => {
     upstreamHeaders["Authorization"] = `Bearer ${MCP_SERVER_TOKEN}`;
   }
 
-  let upstream: Response;
-  try {
-    upstream = await fetch(MCP_SERVER_URL, {
-      method: "POST",
-      headers: upstreamHeaders,
-      body: JSON.stringify(payload),
-    });
-  } catch (err) {
-    return json(
-      {
-        error: "UPSTREAM_UNREACHABLE",
-        message: err instanceof Error ? err.message : String(err),
-      },
-      502,
-    );
+  // --- 2 attempts (initial + 1 retry) on network error or 5xx, NOT for SSE responses ---
+  let upstream: Response | null = null;
+  let lastError: string | null = null;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const res = await upstreamFetchOnce(MCP_SERVER_URL, upstreamHeaders, payloadBody, UPSTREAM_TIMEOUT_MS);
+      if (res.status >= 500 && attempt < 2) {
+        lastError = `upstream ${res.status}`;
+        await res.body?.cancel().catch(() => {});
+        await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS));
+        continue;
+      }
+      upstream = res;
+      break;
+    } catch (err) {
+      lastError = err instanceof Error ? err.message : String(err);
+      console.warn(`[mcp-call] attempt ${attempt} failed:`, lastError);
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS));
+        continue;
+      }
+    }
+  }
+
+  if (!upstream) {
+    return json(req, { error: "UPSTREAM_UNAVAILABLE", message: lastError ?? "upstream unreachable" }, 503);
   }
 
   const contentType = upstream.headers.get("content-type") ?? "";
+  const cors = buildCorsHeaders(req);
 
-  // SSE stream → pass through
+  // SSE stream → pass through with CORS attached
   if (contentType.includes("text/event-stream")) {
     return new Response(upstream.body, {
       status: upstream.status,
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      headers: { ...cors, "Content-Type": "text/event-stream" },
     });
   }
 
@@ -121,11 +130,9 @@ Deno.serve(async (req) => {
     {
       status: upstream.status,
       headers: {
-        ...corsHeaders,
-        "Content-Type": contentType.includes("json")
-          ? "application/json"
-          : "text/plain",
+        ...cors,
+        "Content-Type": contentType.includes("json") ? "application/json" : "text/plain",
       },
     },
   );
-});
+}));
