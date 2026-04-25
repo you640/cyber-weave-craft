@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -30,7 +31,7 @@ function validateLive(cmd: string): ValidationResult {
 }
 
 async function logCommand(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   adminId: string,
   command: string,
   exitCode: number,
