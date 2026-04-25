@@ -44,10 +44,12 @@ async function logCommand(
   }
 }
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+Deno.serve((req) => withCors(req, async () => {
+  const pre = handlePreflight(req);
+  if (pre) return pre;
+  const corsHeaders = buildCorsHeaders(req);
 
-  try {
+  {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -215,11 +217,5 @@ Deno.serve(async (req) => {
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-  } catch (e) {
-    console.error("[vps-exec-live] unexpected", e);
-    return new Response(
-      JSON.stringify({ error: "Internal error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
   }
-});
+}));
