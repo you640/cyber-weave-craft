@@ -1,84 +1,73 @@
+# Plán: oprava CORS na vps-exec + 502 na mcp-call
 
+## Root cause
 
-## Cieľ
-Veľký refactor **header menu (WireNav)** a **hero sekcie (Hero)** — kvalitnejší vizuál, lepšia hierarchia, mobilná navigácia, výraznejšie CTA, "živý" trust layer.
+**vps-exec CORS z `https://nexify-studio.tech`**
+Funkcia má `Allow-Origin: *` ale **chýba `Access-Control-Allow-Methods`**. Niektoré browsery (najmä keď request nesie `Authorization`) preflight zamietnu.
 
----
+**mcp-call 502**
+Jediný `fetch()` na MCP server bez timeoutu a bez retry. Akýkoľvek prechodný network error → okamžitý 502.
 
-## 1. WireNav — premium navigácia
+## Zmeny
 
-**Štruktúra (3 sloty: ľavý / stredný / pravý):**
-- **Ľavý:** logo (shield mobile, full desktop) + jemný "live status" pill `● ONLINE · sentinel-01`
-- **Stredný:** linky s aktívnym stavom (zvýraznenie aktuálnej kotvy cez IntersectionObserver)
-- **Pravý:** UserMenu, sekundárne tlačidlo `Login`, primárne CTA `Audit →` so sand-glass ikonou + mobilný hamburger
+### 1. Nový shared modul `supabase/functions/_shared/cors.ts`
+Allowlist (reflexia Origin, žiadny `*`):
+- `https://nexify-studio.tech`
+- `https://cyber-weave-craft.lovable.app`
+- ľubovoľný `https://*.lovable.app` (preview + sandbox)
+- `http://localhost:*` (dev)
 
-**Vylepšenia:**
-- **Scroll-aware:** v hornej polohe nav transparentný/jemný; pri scrolle pridá `backdrop-blur` + výraznejší border + zmenší padding (compact mode)
-- **Active-link indikátor:** modrý `▍` ľavý okraj alebo podčiarknutie pri aktívnej sekcii
-- **Hover micro-interactions:** šípka `→` sa vysunie pri hover na CTA, linky majú jemnú "monospace bracket" animáciu `[ link ]`
-- **Mobile menu:** hamburger ikona otvorí `Sheet` (shadcn) zo strany — full-screen overlay s veľkými mono linkami, sociálnymi ikonami a CTA
-- **Keyboard accessible:** focus-visible outlines, Esc zatvára sheet
-- **"Command palette" hint:** malý `⌘K` chip vpravo (vizuálny prvok, neskôr funkčný)
+Exporty:
+- `buildCorsHeaders(req)` — reflektuje Origin ak je v allowliste, vždy obsahuje `Access-Control-Allow-Methods: POST, OPTIONS`, `Access-Control-Allow-Headers: authorization, x-client-info, apikey, content-type`, `Access-Control-Max-Age: 86400`, `Vary: Origin`.
+- `handlePreflight(req)` — vráti 204 s CORS ak OPTIONS, inak `null`.
+- `json(req, body, status)` — JSON response s CORS.
+- `withCors(req, handler)` — top-level try/catch wrapper, garantuje CORS aj pri runtime chybe (`{ error: "INTERNAL", message }`, status 500).
 
----
+### 2. `vps-exec/index.ts`
+- Nahradiť lokálne `corsHeaders` shared helperom.
+- Prvý riadok handlera: `const pre = handlePreflight(req); if (pre) return pre;`
+- Telo handlera obaliť do `withCors(req, …)`.
+- Všetky `new Response(JSON.stringify(...))` → `json(req, ..., status)`.
+- Bridge fetch: ponechať existujúci 15s abort, **pridať 1 retry** (max 2 pokusy) na network error / 5xx, backoff 400 ms.
+- Pri vyčerpanom retry → `json(req, { error: "UPSTREAM_UNAVAILABLE" }, 503)`.
 
-## 2. Hero — refactor o 500 %
+### 3. `mcp-call/index.ts`
+- To isté: shared CORS, `handlePreflight`, `withCors`.
+- Pridať `AbortController` s **25 s timeout** okolo upstream `fetch`.
+- **2 pokusy** (initial + 1 retry), 500 ms backoff, retry len na network error alebo upstream 5xx.
+- SSE stream pass-through ostáva — retry sa NEpoužíva pre SSE.
+- Pri vyčerpanom retry → `json(req, { error: "UPSTREAM_UNAVAILABLE" }, 503)`.
+- Všetky error vetvy cez `json(req, …)`.
 
-**Nová horná lišta (announcement bar):**
-- Namiesto statického pillu → **rotujúci ticker** s 3 správami:
-  `● LIVE · Blokovaných útokov dnes: 1 247` / `🛡 SOC online · reakcia < 4h` / `📍 SK · CZ · 2026`
-- Výraznejšie typo, jemný gradient pozadia
+### 4. `vps-exec-live/index.ts` (kvôli konzistencii a aby dashboard shell ostal funkčný)
+- Aplikovať shared CORS + `handlePreflight` + `withCors`.
+- Existujúci 30s abort + jednorazový pokus ponechať (live shell, retry by spustil príkaz dvakrát — nebezpečné).
 
-**Headline & copy:**
-- Zachovať existujúci headline, ale pridať **"typewriter" efekt** na slovo `bez stráže.` (alebo cyklus: bez stráže / bez logov / bez záchrannej siete)
-- Pod headline pridať **"as seen in" / dôveryhodnostný riadok** — logá technologií ktoré monitorujeme (WordPress, Shopify, Cloudflare, AWS) ako sivé wireframe boxy
-- Lepšia hierarchia: lead paragraph zväčšený, supporting paragraph menší, viac whitespace
+### 5. Frontend invoke guard
 
-**CTA blok:**
-- Primárne CTA `Objednať audit zdarma →` zväčšené, s pulzujúcim ringom
-- Sekundárne `Pozrieť demo (2 min)` s `▶` ikonou namiesto PDF cenníka
-- Pod CTA: **trust microcopy** `✓ Bez kreditky · ✓ Audit do 24h · ✓ Žiadny záväzok`
+**`src/hooks/use-vps-exec.ts`**
+- Pred `supabase.functions.invoke(...)`:
+  ```ts
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { setState({ data: null, error: "NOT_AUTHENTICATED", loading: false }); return null; }
+  ```
+- Mapovať response error: ak msg obsahuje `UPSTREAM_UNAVAILABLE` alebo `BRIDGE_ERROR` → friendly text `"Backend dočasne nedostupný, skús znovu o chvíľu."`.
 
-**Stats grid (4 boxy):**
-- Pridať **animované počítadlo** (count-up od 0 pri scroll-into-view)
-- Pridať mini-sparkline alebo ikonu do každého boxu
-- Hover stav: box sa mierne zdvihne (`translate -1px` + shadow)
+**`src/components/dashboard/panels/HealthPanel.tsx`**
+- Pridať banner pre `error === "NOT_AUTHENTICATED"` s linkom `[ prihlásiť sa ]` (`/auth`). Inak žiadna úprava — chybové texty z hooku sa zobrazia v existujúcom `[ ERROR ]` strip.
 
-**Pravý stĺpec (dashboard preview):**
-- Hlavný obrázok dostane **"browser chrome" rámček** (3 bodky + URL bar `nexify.guard/dashboard`)
-- Pridať **floating notification card** poprí rohu: `🚨 Brute-force blokovaný · pred 12s` (animovaný in)
-- 3 thumbnaily dole — pridať hover zoom + label pri hover
-- Annotation `live SIEM ↑` urobiť výraznejšiu
+**`src/components/dashboard/panels/McpPanel.tsx`**
+- V `callMcp` pred `invoke`: rovnaký session check. Ak nie je session, throw `Error` s `code: "NOT_AUTHENTICATED"`.
+- Stav `error` zobrazí: ak `NOT_AUTHENTICATED` → CTA `[ prihlásiť sa → /auth ]`; ak `UPSTREAM_UNAVAILABLE` → `"MCP server dočasne nedostupný."`.
 
-**Nový element pod hero:**
-- **Marquee/ticker** so 6-8 logami klientov alebo technológií (nekonečný scroll), nadpis `Strážime stack ktorý poznáte`
+### 6. Deploy + verify
+- Deploy `vps-exec`, `mcp-call`, `vps-exec-live` cez `supabase--deploy_edge_functions`.
+- Curl OPTIONS preflight pre obe, raz s `Origin: https://nexify-studio.tech`, raz s lovable preview origin → očakávame 204 + reflektovaný `Access-Control-Allow-Origin` + `Access-Control-Allow-Methods: POST, OPTIONS`.
+- Curl POST `vps-exec` bez auth → 401 JSON **s** CORS hlavičkami.
+- Skontrolovať `mcp-call` logy po teste (timeout/retry sa loguje).
+- Stručný report v chate: root cause, čo opravené, zostávajúce riziká.
 
----
-
-## 3. Technická implementácia
-
-**Nové súbory:**
-- `src/components/landing/MobileNav.tsx` — Sheet-based mobilná navigácia
-- `src/components/landing/AnnouncementTicker.tsx` — rotujúci horný banner
-- `src/components/landing/BrowserFrame.tsx` — wrapper s URL barom okolo dashboard imagu
-- `src/components/landing/TechMarquee.tsx` — nekonečný scrollovací riadok log
-- `src/hooks/use-active-section.ts` — IntersectionObserver pre aktívne kotvy
-- `src/hooks/use-scroll-position.ts` — pre scroll-aware nav
-- `src/hooks/use-count-up.ts` — animované čísla v stats
-
-**Upravené súbory:**
-- `src/components/landing/WireNav.tsx` — kompletný refactor
-- `src/components/landing/Hero.tsx` — kompletný refactor
-- `src/index.css` — nové utility (`.nav-compact`, `.marquee`, animácie keyframes)
-
-**Závislosti:** všetko už je (shadcn Sheet, lucide-react, react-router). Žiadne nové npm balíky.
-
----
-
-## 4. Čo NEMENÍME
-- Routing, Supabase, edge functions
-- Logo assety (ostávajú nové)
-- Dolnú časť landingu (Guard, Tiers, Services...)
-- Color tokens / fonty
-- Texty mimo hero sekcie
-
+## Zostávajúce riziká
+- Ak je MCP server (194.182.87.6:8443) skutočne down, retry nepomôže — užívateľ uvidí `UPSTREAM_UNAVAILABLE`. To je správne správanie.
+- 25s timeout je dosť pre väčšinu tool calls; extrémne dlhé operácie treba presunúť na SSE stream.
+- Allowlist hardcoded v `_shared/cors.ts` — pri pridaní novej domény treba upraviť tento súbor.
