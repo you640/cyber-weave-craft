@@ -65,11 +65,16 @@ export const McpPanel = () => {
 
   const callMcp = useCallback(
     async (body: Record<string, unknown>) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw Object.assign(new Error("Nie si prihlásený — prihlás sa znova."), {
+          code: "NOT_AUTHENTICATED",
+        });
+      }
       const { data, error } = await supabase.functions.invoke("mcp-call", {
         body,
       });
       if (error) {
-        // Edge function returned non-2xx; surface message from data if present
         const msg =
           (data as { message?: string; error?: string } | null)?.message ??
           (data as { error?: string } | null)?.error ??
@@ -77,6 +82,12 @@ export const McpPanel = () => {
         const code = (data as { error?: string } | null)?.error;
         if (code === "MCP_NOT_CONFIGURED") {
           throw Object.assign(new Error(msg), { code });
+        }
+        if (code === "UPSTREAM_UNAVAILABLE" || /50[23]/.test(String(error.message ?? ""))) {
+          throw Object.assign(
+            new Error("MCP server dočasne nedostupný, skús znovu o chvíľu."),
+            { code: "UPSTREAM_UNAVAILABLE" },
+          );
         }
         throw new Error(msg);
       }
