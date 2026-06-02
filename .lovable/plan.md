@@ -1,73 +1,66 @@
-# Plán: oprava CORS na vps-exec + 502 na mcp-call
+## /dashboard mega upgrade — Linear/Vercel vibe
 
-## Root cause
+Cieľ: posunúť admin dashboard z čisto wire/mono terminálu k modernému Linear/Vercel admin-u — jemnejšie povrchy, lepšia hierarchia, živé KPI, čisté error/empty stavy, lepšia navigácia. Wire akcenty (mono font, hranaté borders) zostávajú ako brand detail, ale prestávajú dominovať.
 
-**vps-exec CORS z `https://nexify-studio.tech`**
-Funkcia má `Allow-Origin: *` ale **chýba `Access-Control-Allow-Methods`**. Niektoré browsery (najmä keď request nesie `Authorization`) preflight zamietnu.
+### 1. Design system tweaks (`src/index.css`, `tailwind.config.ts`)
+- Pridať nové semantické tokeny: `--surface`, `--surface-elevated`, `--surface-muted`, `--border-subtle`, `--border-strong`, `--ring-focus`.
+- Stavové farby: `--success`, `--warning`, `--danger`, `--info` + `-foreground` varianty (HSL).
+- Jemné gradienty: `--gradient-panel`, `--gradient-accent` pre KPI karty a hero strip.
+- Soft shadow utility (`wire-shadow-soft`) a `radius-card` (8–10px) — wire-border ostáva pre špeciálne akcenty.
 
-**mcp-call 502**
-Jediný `fetch()` na MCP server bez timeoutu a bez retry. Akýkoľvek prechodný network error → okamžitý 502.
+### 2. Shell & navigácia (`Dashboard.tsx`, `AdminSidebar.tsx`)
+- Header: sticky, ľavá strana = breadcrumb (Dashboard › Health), pravá = global search (⌘K placeholder), notif bell, UserMenu.
+- Sidebar:
+  - Zoskupiť do sekcií: **Monitor** (Overview, Health, Diagnostics), **Audit** (WP Audit, Reports), **Ops** (Shell, Shell Live, MCP), **Security** (MFA), **Coming soon** (Users, Attack Feed, Settings).
+  - Active stav: ľavý 2px accent bar + jemný surface highlight (nie bracketed text).
+  - Collapsed mode: tooltipy s názvom.
+  - Mobile: off-canvas drawer cez `SidebarTrigger`.
+- Footer sidebaru: status pill (cloud/edge health) + verzia buildu.
 
-## Zmeny
+### 3. Overview redesign (`panels/Overview.tsx`)
+Nahradiť statický obsah živým prehľadom:
+- **KPI row (4 karty)**: Uptime, Aktívne hrozby (z attack-stream), Posledný WP audit score, Edge fn health. Každá karta = label, veľké číslo, delta vs. predošlé obdobie, mini sparkline.
+- **Activity feed**: posledných 8 udalostí (audit, shell run, MCP call) — kompaktný list s ikonou, časom, statusom.
+- **Quick actions**: 3 tlačidlá (Run WP audit, Open shell, Probe MCP).
+- **System status grid**: bento 2×2 — Edge functions, Database, MCP, VPS bridge; každý s farebným dotom + ms latency.
 
-### 1. Nový shared modul `supabase/functions/_shared/cors.ts`
-Allowlist (reflexia Origin, žiadny `*`):
-- `https://nexify-studio.tech`
-- `https://cyber-weave-craft.lovable.app`
-- ľubovoľný `https://*.lovable.app` (preview + sandbox)
-- `http://localhost:*` (dev)
+### 4. Panely – funkčný + vizuálny polish
+- **HealthPanel**: jednotný PageHeader, status karty so semantickými farbami (success/warn/danger), retry button, jasný empty + auth CTA.
+- **McpPanel**: rozdeliť na Tabs (Tools / Console / Logs), status pill v headeri, presety ako chipy, lepšia JSON edit zóna (mono font + line numbers cez `<pre>` overlay).
+- **ShellPanel / ShellLivePanel**: terminálové okno s tmavým surface, sticky príkazová lišta, history sidebar.
+- **WpAuditPanel / ReportsPanel / DiagnosticsPanel**: konzistentný PageHeader + Card layout, prázdne stavy s ilustráciou (jednoduchý SVG/dot pattern) a primárnym CTA.
+- **MfaPanel**: jasné stepper UI pre enroll, recovery codes v `monospace` boxe s copy/download.
 
-Exporty:
-- `buildCorsHeaders(req)` — reflektuje Origin ak je v allowliste, vždy obsahuje `Access-Control-Allow-Methods: POST, OPTIONS`, `Access-Control-Allow-Headers: authorization, x-client-info, apikey, content-type`, `Access-Control-Max-Age: 86400`, `Vary: Origin`.
-- `handlePreflight(req)` — vráti 204 s CORS ak OPTIONS, inak `null`.
-- `json(req, body, status)` — JSON response s CORS.
-- `withCors(req, handler)` — top-level try/catch wrapper, garantuje CORS aj pri runtime chybe (`{ error: "INTERNAL", message }`, status 500).
+### 5. Shared building blocks (nové komponenty)
+- `components/dashboard/ui/PageHeader.tsx` — eyebrow, title, description, actions slot.
+- `components/dashboard/ui/StatCard.tsx` — KPI karta s deltou a sparkline.
+- `components/dashboard/ui/StatusPill.tsx` — semantický pill (idle/ok/warn/err/loading).
+- `components/dashboard/ui/EmptyState.tsx` — ikona, title, popis, CTA.
+- `components/dashboard/ui/SectionCard.tsx` — surface + header + content slot.
+Všetky panely refaktorovať na tieto bloky → konzistencia.
 
-### 2. `vps-exec/index.ts`
-- Nahradiť lokálne `corsHeaders` shared helperom.
-- Prvý riadok handlera: `const pre = handlePreflight(req); if (pre) return pre;`
-- Telo handlera obaliť do `withCors(req, …)`.
-- Všetky `new Response(JSON.stringify(...))` → `json(req, ..., status)`.
-- Bridge fetch: ponechať existujúci 15s abort, **pridať 1 retry** (max 2 pokusy) na network error / 5xx, backoff 400 ms.
-- Pri vyčerpanom retry → `json(req, { error: "UPSTREAM_UNAVAILABLE" }, 503)`.
+### 6. Mikrointerakcie
+- Fade/slide-in panelov pri route change (Framer Motion alebo CSS keyframes).
+- Hover lift na KPI kartách (`translate-y-[-2px]`, soft shadow).
+- Skeleton loadery namiesto „[ loading… ]“ textov.
 
-### 3. `mcp-call/index.ts`
-- To isté: shared CORS, `handlePreflight`, `withCors`.
-- Pridať `AbortController` s **25 s timeout** okolo upstream `fetch`.
-- **2 pokusy** (initial + 1 retry), 500 ms backoff, retry len na network error alebo upstream 5xx.
-- SSE stream pass-through ostáva — retry sa NEpoužíva pre SSE.
-- Pri vyčerpanom retry → `json(req, { error: "UPSTREAM_UNAVAILABLE" }, 503)`.
-- Všetky error vetvy cez `json(req, …)`.
+### 7. Responsive
+- Sidebar: na <768px collapsed default, otvára sa cez trigger.
+- KPI grid: 1 / 2 / 4 stĺpce.
+- Header: search sa skrýva na mobile, ostáva icon button.
 
-### 4. `vps-exec-live/index.ts` (kvôli konzistencii a aby dashboard shell ostal funkčný)
-- Aplikovať shared CORS + `handlePreflight` + `withCors`.
-- Existujúci 30s abort + jednorazový pokus ponechať (live shell, retry by spustil príkaz dvakrát — nebezpečné).
+### 8. Out of scope
+- Žiadne zmeny v backend logike, edge functions, RLS ani schéme.
+- Žiadne zmeny landing page.
+- Žiadne nové integrácie/secrets.
 
-### 5. Frontend invoke guard
+### Súbory ktoré sa zmenia
+- `src/index.css`, `tailwind.config.ts`
+- `src/pages/Dashboard.tsx`
+- `src/components/dashboard/AdminSidebar.tsx`
+- `src/components/dashboard/panels/*` (všetky)
+- Nové: `src/components/dashboard/ui/{PageHeader,StatCard,StatusPill,EmptyState,SectionCard}.tsx`
 
-**`src/hooks/use-vps-exec.ts`**
-- Pred `supabase.functions.invoke(...)`:
-  ```ts
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) { setState({ data: null, error: "NOT_AUTHENTICATED", loading: false }); return null; }
-  ```
-- Mapovať response error: ak msg obsahuje `UPSTREAM_UNAVAILABLE` alebo `BRIDGE_ERROR` → friendly text `"Backend dočasne nedostupný, skús znovu o chvíľu."`.
-
-**`src/components/dashboard/panels/HealthPanel.tsx`**
-- Pridať banner pre `error === "NOT_AUTHENTICATED"` s linkom `[ prihlásiť sa ]` (`/auth`). Inak žiadna úprava — chybové texty z hooku sa zobrazia v existujúcom `[ ERROR ]` strip.
-
-**`src/components/dashboard/panels/McpPanel.tsx`**
-- V `callMcp` pred `invoke`: rovnaký session check. Ak nie je session, throw `Error` s `code: "NOT_AUTHENTICATED"`.
-- Stav `error` zobrazí: ak `NOT_AUTHENTICATED` → CTA `[ prihlásiť sa → /auth ]`; ak `UPSTREAM_UNAVAILABLE` → `"MCP server dočasne nedostupný."`.
-
-### 6. Deploy + verify
-- Deploy `vps-exec`, `mcp-call`, `vps-exec-live` cez `supabase--deploy_edge_functions`.
-- Curl OPTIONS preflight pre obe, raz s `Origin: https://nexify-studio.tech`, raz s lovable preview origin → očakávame 204 + reflektovaný `Access-Control-Allow-Origin` + `Access-Control-Allow-Methods: POST, OPTIONS`.
-- Curl POST `vps-exec` bez auth → 401 JSON **s** CORS hlavičkami.
-- Skontrolovať `mcp-call` logy po teste (timeout/retry sa loguje).
-- Stručný report v chate: root cause, čo opravené, zostávajúce riziká.
-
-## Zostávajúce riziká
-- Ak je MCP server (194.182.87.6:8443) skutočne down, retry nepomôže — užívateľ uvidí `UPSTREAM_UNAVAILABLE`. To je správne správanie.
-- 25s timeout je dosť pre väčšinu tool calls; extrémne dlhé operácie treba presunúť na SSE stream.
-- Allowlist hardcoded v `_shared/cors.ts` — pri pridaní novej domény treba upraviť tento súbor.
+### Riziká
+- Veľký vizuálny diff — môže pôsobiť ako „iná appka“. Wire akcenty (mono labels, bracketed CTA) zámerne nechám na pár miestach, aby zostal brand kontinuálny.
+- KPI dáta: ak nemáme reálne metriky pre uptime/edge health, prvá verzia použije mock + TODO hook na neskôr (bez backend zmien).

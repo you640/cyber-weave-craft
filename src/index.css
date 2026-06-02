@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Wireframe SaaS design system — white bg, mono labels, electric blue accent */
+/* Wireframe SaaS design system — white bg, mono labels, electric blue accent
+   + Linear/Vercel admin surfaces for /dashboard */
 
 @layer base {
   :root {
@@ -44,15 +45,41 @@
     --wire-stamp: 221 83% 53%;
     --wire-handwritten: 18 90% 55%;
 
+    /* Admin / Linear-Vercel surfaces */
+    --surface: 0 0% 100%;
+    --surface-elevated: 0 0% 99%;
+    --surface-muted: 220 14% 97%;
+    --surface-sunken: 220 14% 96%;
+    --border-subtle: 220 13% 91%;
+    --border-strong: 220 13% 82%;
+    --ring-focus: 221 83% 53%;
+
+    /* Status palette (HSL) */
+    --success: 152 65% 38%;
+    --success-foreground: 0 0% 100%;
+    --warning: 35 95% 50%;
+    --warning-foreground: 0 0% 10%;
+    --danger: 0 80% 55%;
+    --danger-foreground: 0 0% 100%;
+    --info: 210 90% 55%;
+    --info-foreground: 0 0% 100%;
+
+    /* Gradients & shadows */
+    --gradient-panel: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 14% 98%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(221 83% 53% / 0.12), hsl(221 83% 53% / 0));
+    --shadow-soft: 0 1px 2px hsl(220 13% 10% / 0.04), 0 4px 12px hsl(220 13% 10% / 0.04);
+    --shadow-elevated: 0 2px 4px hsl(220 13% 10% / 0.04), 0 12px 32px hsl(220 13% 10% / 0.06);
+    --radius-card: 10px;
+
     --radius: 0.25rem;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 4%;
     --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent: 220 14% 97%;
     --sidebar-accent-foreground: 0 0% 4%;
-    --sidebar-border: 0 0% 90%;
+    --sidebar-border: 220 13% 91%;
     --sidebar-ring: 221 83% 53%;
   }
 
@@ -114,7 +141,6 @@
     background-size: 18px 18px;
   }
 
-  /* Diagonal hatch placeholder */
   .wire-hatch {
     background-image: repeating-linear-gradient(
       45deg,
@@ -138,21 +164,47 @@
   .wire-border {
     border: 1.5px dashed hsl(var(--wire-line-strong));
   }
-
+  .wire-border-r {
+    border-right: 1.5px dashed hsl(var(--wire-line-strong));
+  }
   .wire-border-solid {
     border: 1.5px solid hsl(var(--foreground));
   }
-
   .wire-shadow {
     box-shadow: 4px 4px 0 0 hsl(var(--foreground));
   }
-
   .wire-shadow-sm {
     box-shadow: 2px 2px 0 0 hsl(var(--foreground));
   }
-
   .wire-shadow-primary {
     box-shadow: 4px 4px 0 0 hsl(var(--primary));
+  }
+
+  /* Admin surfaces */
+  .surface-card {
+    background: hsl(var(--surface));
+    border: 1px solid hsl(var(--border-subtle));
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+  }
+  .surface-card-elevated {
+    background: var(--gradient-panel);
+    border: 1px solid hsl(var(--border-subtle));
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-elevated);
+  }
+  .surface-muted {
+    background: hsl(var(--surface-muted));
+    border: 1px solid hsl(var(--border-subtle));
+    border-radius: var(--radius-card);
+  }
+  .hover-lift {
+    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+    border-color: hsl(var(--border-strong));
   }
 
   @keyframes marquee {
@@ -164,5 +216,21 @@
   }
   .animate-marquee:hover {
     animation-play-state: paused;
+  }
+
+  @keyframes panel-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-panel-in {
+    animation: panel-in 240ms ease-out both;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  .animate-pulse-dot {
+    animation: pulse-dot 1.6s ease-in-out infinite;
   }
 }

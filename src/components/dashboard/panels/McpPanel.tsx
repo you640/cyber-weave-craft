@@ -1,113 +1,74 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { PageHeader } from "@/components/dashboard/ui/PageHeader";
+import { SectionCard } from "@/components/dashboard/ui/SectionCard";
+import { StatusPill, StatusTone } from "@/components/dashboard/ui/StatusPill";
+import { EmptyState } from "@/components/dashboard/ui/EmptyState";
+import { Button } from "@/components/ui/button";
+import { LogIn, Plug, RefreshCw, Send, Trash2 } from "lucide-react";
 
-interface McpTool {
-  name: string;
-  description?: string;
-  inputSchema?: unknown;
-}
-
-interface LogEntry {
-  ts: string;
-  dir: "→" | "←" | "!";
-  text: string;
-}
+interface McpTool { name: string; description?: string; inputSchema?: unknown; }
+interface LogEntry { ts: string; dir: "→" | "←" | "!"; text: string; }
 
 const PRESET_REQUESTS: { label: string; body: Record<string, unknown> }[] = [
   {
     label: "initialize",
     body: {
-      jsonrpc: "2.0",
-      id: 1,
-      method: "initialize",
-      params: {
-        protocolVersion: "2024-11-05",
-        capabilities: {},
-        clientInfo: { name: "nexify-dashboard", version: "0.1.0" },
-      },
+      jsonrpc: "2.0", id: 1, method: "initialize",
+      params: { protocolVersion: "2024-11-05", capabilities: {}, clientInfo: { name: "nexify-dashboard", version: "0.1.0" } },
     },
   },
-  {
-    label: "tools/list",
-    body: { jsonrpc: "2.0", id: 2, method: "tools/list", params: {} },
-  },
-  {
-    label: "ping",
-    body: { jsonrpc: "2.0", id: 3, method: "ping", params: {} },
-  },
+  { label: "tools/list", body: { jsonrpc: "2.0", id: 2, method: "tools/list", params: {} } },
+  { label: "ping", body: { jsonrpc: "2.0", id: 3, method: "ping", params: {} } },
 ];
 
+type Status = "idle" | "loading" | "ready" | "not_configured" | "error" | "auth";
+
 export const McpPanel = () => {
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "ready" | "not_configured" | "error"
-  >("idle");
+  const [status, setStatus] = useState<Status>("idle");
   const [statusMsg, setStatusMsg] = useState<string>("");
   const [tools, setTools] = useState<McpTool[]>([]);
   const [log, setLog] = useState<LogEntry[]>([]);
-  const [requestText, setRequestText] = useState<string>(
-    JSON.stringify(PRESET_REQUESTS[1].body, null, 2),
-  );
+  const [requestText, setRequestText] = useState<string>(JSON.stringify(PRESET_REQUESTS[1].body, null, 2));
   const [sending, setSending] = useState(false);
   const logEndRef = useRef<HTMLDivElement>(null);
 
   const pushLog = useCallback((entry: Omit<LogEntry, "ts">) => {
-    setLog((prev) =>
-      [
-        ...prev,
-        { ...entry, ts: new Date().toISOString().substring(11, 19) },
-      ].slice(-50),
-    );
+    setLog((prev) => [...prev, { ...entry, ts: new Date().toISOString().substring(11, 19) }].slice(-50));
   }, []);
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [log]);
 
-  const callMcp = useCallback(
-    async (body: Record<string, unknown>) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw Object.assign(new Error("Nie si prihlásený — prihlás sa znova."), {
-          code: "NOT_AUTHENTICATED",
-        });
+  const callMcp = useCallback(async (body: Record<string, unknown>) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw Object.assign(new Error("Nie si prihlásený — prihlás sa znova."), { code: "NOT_AUTHENTICATED" });
+    }
+    const { data, error } = await supabase.functions.invoke("mcp-call", { body });
+    if (error) {
+      const msg =
+        (data as { message?: string; error?: string } | null)?.message ??
+        (data as { error?: string } | null)?.error ??
+        error.message;
+      const code = (data as { error?: string } | null)?.error;
+      if (code === "MCP_NOT_CONFIGURED") throw Object.assign(new Error(msg), { code });
+      if (code === "UPSTREAM_UNAVAILABLE" || /50[23]/.test(String(error.message ?? ""))) {
+        throw Object.assign(new Error("MCP server dočasne nedostupný, skús znovu o chvíľu."), { code: "UPSTREAM_UNAVAILABLE" });
       }
-      const { data, error } = await supabase.functions.invoke("mcp-call", {
-        body,
-      });
-      if (error) {
-        const msg =
-          (data as { message?: string; error?: string } | null)?.message ??
-          (data as { error?: string } | null)?.error ??
-          error.message;
-        const code = (data as { error?: string } | null)?.error;
-        if (code === "MCP_NOT_CONFIGURED") {
-          throw Object.assign(new Error(msg), { code });
-        }
-        if (code === "UPSTREAM_UNAVAILABLE" || /50[23]/.test(String(error.message ?? ""))) {
-          throw Object.assign(
-            new Error("MCP server dočasne nedostupný, skús znovu o chvíľu."),
-            { code: "UPSTREAM_UNAVAILABLE" },
-          );
-        }
-        throw new Error(msg);
-      }
-      return data;
-    },
-    [],
-  );
+      throw new Error(msg);
+    }
+    return data;
+  }, []);
 
   const probe = useCallback(async () => {
     setStatus("loading");
     setStatusMsg("");
     try {
       pushLog({ dir: "→", text: "tools/list" });
-      const res = (await callMcp(PRESET_REQUESTS[1].body)) as {
-        result?: { tools?: McpTool[] };
-        error?: { message?: string };
-      };
-      if (res?.error) {
-        throw new Error(res.error.message ?? "MCP error");
-      }
+      const res = (await callMcp(PRESET_REQUESTS[1].body)) as { result?: { tools?: McpTool[] }; error?: { message?: string } };
+      if (res?.error) throw new Error(res.error.message ?? "MCP error");
       const list = res?.result?.tools ?? [];
       setTools(list);
       setStatus("ready");
@@ -118,6 +79,9 @@ export const McpPanel = () => {
       if (e.code === "MCP_NOT_CONFIGURED") {
         setStatus("not_configured");
         setStatusMsg(e.message ?? "Not configured");
+      } else if (e.code === "NOT_AUTHENTICATED") {
+        setStatus("auth");
+        setStatusMsg(e.message ?? "Not authenticated");
       } else {
         setStatus("error");
         setStatusMsg(e.message ?? "Failed to reach MCP server");
@@ -126,231 +90,184 @@ export const McpPanel = () => {
     }
   }, [callMcp, pushLog]);
 
-  useEffect(() => {
-    probe();
-  }, [probe]);
+  useEffect(() => { probe(); }, [probe]);
 
   const sendRequest = useCallback(async () => {
     let parsed: Record<string, unknown>;
-    try {
-      parsed = JSON.parse(requestText);
-    } catch {
-      pushLog({ dir: "!", text: "Invalid JSON" });
-      return;
-    }
+    try { parsed = JSON.parse(requestText); }
+    catch { pushLog({ dir: "!", text: "Invalid JSON" }); return; }
     setSending(true);
     pushLog({ dir: "→", text: String(parsed.method ?? "request") });
     try {
       const res = await callMcp(parsed);
-      pushLog({
-        dir: "←",
-        text: JSON.stringify(res).slice(0, 500),
-      });
+      pushLog({ dir: "←", text: JSON.stringify(res).slice(0, 500) });
     } catch (err) {
-      pushLog({
-        dir: "!",
-        text: err instanceof Error ? err.message : "error",
-      });
-    } finally {
-      setSending(false);
-    }
+      pushLog({ dir: "!", text: err instanceof Error ? err.message : "error" });
+    } finally { setSending(false); }
   }, [requestText, callMcp, pushLog]);
 
-  const statusDot =
-    status === "ready"
-      ? "bg-primary"
-      : status === "loading"
-        ? "bg-muted-foreground animate-pulse"
-        : status === "not_configured"
-          ? "bg-muted-foreground"
-          : status === "error"
-            ? "bg-destructive"
-            : "bg-muted-foreground";
+  const tone: StatusTone =
+    status === "ready" ? "ok" :
+    status === "loading" ? "loading" :
+    status === "not_configured" ? "warn" :
+    status === "auth" ? "warn" :
+    status === "error" ? "err" : "idle";
 
-  const statusLabel =
-    status === "ready"
-      ? "ONLINE"
-      : status === "loading"
-        ? "PROBING"
-        : status === "not_configured"
-          ? "NOT CONFIGURED"
-          : status === "error"
-            ? "ERROR"
-            : "IDLE";
+  const toneLabel =
+    status === "ready" ? "ONLINE" :
+    status === "loading" ? "PROBING" :
+    status === "not_configured" ? "NOT CONFIGURED" :
+    status === "auth" ? "AUTH" :
+    status === "error" ? "ERROR" : "IDLE";
 
   return (
     <div className="space-y-8">
-      <div>
-        <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
-          // MCP · 04
-        </div>
-        <h1 className="font-mono text-2xl md:text-3xl mt-2 text-foreground">
-          MCP server proxy
-        </h1>
-        <div className="border-t border-dashed border-border mt-4" />
-      </div>
-
-      {/* Status bar */}
-      <div className="wire-border bg-[hsl(var(--wire-bg-soft))] px-4 py-3 font-mono text-[10px] tracking-[0.25em] uppercase text-muted-foreground flex items-center gap-3 flex-wrap">
-        <span className={`h-2 w-2 rounded-full ${statusDot}`} />
-        <span>{statusLabel}</span>
-        {statusMsg && (
+      <PageHeader
+        eyebrow="// MCP · 04"
+        title="MCP server proxy"
+        description="Pošli JSON-RPC volania do svojho MCP serveru cez edge proxy."
+        actions={
           <>
-            <span className="opacity-50">·</span>
-            <span className="normal-case tracking-normal text-xs text-foreground">
-              {statusMsg}
-            </span>
+            <StatusPill tone={tone} label={toneLabel} />
+            <Button variant="outline" size="sm" onClick={probe} className="h-8">
+              <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Re-probe
+            </Button>
           </>
-        )}
-        <button
-          type="button"
-          onClick={probe}
-          className="ml-auto text-[10px] tracking-[0.2em] uppercase text-foreground hover:text-primary transition-colors"
-        >
-          [ re-probe ]
-        </button>
-      </div>
+        }
+      />
+
+      {statusMsg && status !== "auth" && status !== "not_configured" && (
+        <div className="text-xs text-muted-foreground font-mono">{statusMsg}</div>
+      )}
+
+      {status === "auth" && (
+        <SectionCard padded={false}>
+          <EmptyState
+            icon={<LogIn className="h-5 w-5" />}
+            title="Nie si prihlásený"
+            description="MCP proxy volá edge function, ktorá vyžaduje aktívnu session."
+            action={
+              <a href="/auth" className="inline-flex items-center gap-2 h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
+                Prihlásiť sa →
+              </a>
+            }
+          />
+        </SectionCard>
+      )}
 
       {status === "not_configured" && (
-        <div className="wire-border wire-shadow bg-background p-5 space-y-3">
-          <div className="font-mono text-[10px] tracking-[0.25em] uppercase text-muted-foreground">
-            // CONFIGURATION REQUIRED
-          </div>
-          <p className="font-mono text-xs text-foreground leading-relaxed">
-            MCP proxy needs two secrets to reach your MCP server:
+        <SectionCard eyebrow="// CONFIGURATION REQUIRED" title="MCP proxy nemá secrets">
+          <p className="text-sm text-foreground leading-relaxed">
+            MCP proxy potrebuje dva secrets, aby sa dostala k tvojmu MCP serveru:
           </p>
-          <ul className="font-mono text-xs text-muted-foreground space-y-1 pl-4">
+          <ul className="text-sm text-muted-foreground mt-3 space-y-2">
             <li>
-              <span className="text-foreground">MCP_SERVER_URL</span> — full
-              endpoint, e.g. <code>https://194.182.87.6:8443/mcp</code>
+              <code className="font-mono text-foreground bg-[hsl(var(--surface-muted))] px-1.5 py-0.5 rounded">MCP_SERVER_URL</code>
+              {" "}— celá URL, napr. <code className="font-mono">https://194.182.87.6:8443/mcp</code>
             </li>
             <li>
-              <span className="text-foreground">MCP_SERVER_TOKEN</span> —
-              optional bearer token your server validates
+              <code className="font-mono text-foreground bg-[hsl(var(--surface-muted))] px-1.5 py-0.5 rounded">MCP_SERVER_TOKEN</code>
+              {" "}— voliteľný bearer token
             </li>
           </ul>
-          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground pt-2">
-            Add them via Lovable Cloud → Secrets, then click [ re-probe ].
+          <p className="text-xs text-muted-foreground mt-4">
+            Pridaj ich cez Lovable Cloud → Secrets a potom klikni Re-probe.
           </p>
-        </div>
+        </SectionCard>
       )}
 
-      {status === "error" && /Nie si prihl/i.test(statusMsg) && (
-        <div className="wire-border wire-shadow bg-destructive/10 p-5 flex items-center justify-between gap-3 flex-wrap">
-          <div className="font-mono text-xs text-destructive">
-            [ AUTH ] Nie si prihlásený — prihlás sa znova, aby si mohol volať MCP.
-          </div>
-          <a
-            href="/auth"
-            className="font-mono text-[10px] tracking-[0.25em] uppercase text-foreground hover:text-primary"
-          >
-            [ prihlásiť sa → ]
-          </a>
-        </div>
-      )}
-
-      {/* Tools list + request console */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className="wire-border wire-shadow bg-background lg:col-span-2">
-          <div className="px-5 py-3 border-b border-dashed border-border font-mono text-[10px] tracking-[0.25em] uppercase text-muted-foreground">
-            // TOOLS
-          </div>
+        {/* Tools */}
+        <SectionCard
+          eyebrow="// TOOLS"
+          title={`${tools.length} discovered`}
+          className="lg:col-span-2"
+          padded={false}
+        >
           {tools.length === 0 ? (
-            <div className="p-5 font-mono text-xs text-muted-foreground">
-              [ no tools discovered ]
-            </div>
+            <EmptyState
+              icon={<Plug className="h-5 w-5" />}
+              title="Žiadne nástroje"
+              description="Spusti probe pre načítanie zoznamu nástrojov."
+            />
           ) : (
-            <ul className="divide-y divide-dashed divide-border">
+            <ul className="divide-y divide-[hsl(var(--border-subtle))] max-h-[420px] overflow-y-auto">
               {tools.map((t) => (
-                <li key={t.name} className="px-5 py-3 font-mono text-xs">
-                  <div className="text-foreground">
+                <li key={t.name} className="px-5 py-3 text-sm">
+                  <div className="font-mono text-foreground">
                     <span className="text-primary">›</span> {t.name}
                   </div>
                   {t.description && (
-                    <div className="text-muted-foreground text-[11px] mt-1 leading-relaxed">
-                      {t.description}
-                    </div>
+                    <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{t.description}</div>
                   )}
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </SectionCard>
 
-        <div className="wire-border wire-shadow bg-background lg:col-span-3 flex flex-col">
-          <div className="px-5 py-3 border-b border-dashed border-border flex items-center justify-between gap-3 flex-wrap">
-            <div className="font-mono text-[10px] tracking-[0.25em] uppercase text-muted-foreground">
-              // JSON-RPC REQUEST
-            </div>
-            <div className="flex items-center gap-2">
+        {/* Request console */}
+        <SectionCard
+          eyebrow="// JSON-RPC REQUEST"
+          title="Console"
+          className="lg:col-span-3"
+          padded={false}
+          actions={
+            <div className="flex items-center gap-1">
               {PRESET_REQUESTS.map((p) => (
                 <button
                   key={p.label}
                   type="button"
-                  onClick={() =>
-                    setRequestText(JSON.stringify(p.body, null, 2))
-                  }
-                  className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setRequestText(JSON.stringify(p.body, null, 2))}
+                  className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded text-muted-foreground hover:text-foreground hover:bg-[hsl(var(--surface-muted))] transition-colors"
                 >
-                  [ {p.label} ]
+                  {p.label}
                 </button>
               ))}
             </div>
-          </div>
+          }
+        >
           <textarea
             value={requestText}
             onChange={(e) => setRequestText(e.target.value)}
             spellCheck={false}
-            className="flex-1 min-h-[180px] bg-background text-foreground font-mono text-xs p-4 resize-y outline-none border-0 focus:ring-0"
+            className="w-full min-h-[200px] bg-[hsl(var(--surface-muted))] text-foreground font-mono text-xs p-4 resize-y outline-none border-0 focus:ring-0"
           />
-          <div className="px-5 py-3 border-t border-dashed border-border flex items-center justify-between">
+          <div className="px-5 py-3 border-t border-[hsl(var(--border-subtle))] flex items-center justify-between">
             <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
               {sending ? "sending…" : "ready"}
             </span>
-            <button
-              type="button"
-              disabled={sending || status === "not_configured"}
+            <Button
+              size="sm"
+              disabled={sending || status === "not_configured" || status === "auth"}
               onClick={sendRequest}
-              className="font-mono text-[10px] tracking-[0.25em] uppercase text-foreground hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="h-8"
             >
-              [ send → ]
-            </button>
+              <Send className="h-3.5 w-3.5 mr-1.5" /> Send
+            </Button>
           </div>
-        </div>
+        </SectionCard>
       </div>
 
       {/* Log */}
-      <div className="wire-border wire-shadow bg-background">
-        <div className="px-5 py-3 border-b border-dashed border-border flex items-center justify-between">
-          <div className="font-mono text-[10px] tracking-[0.25em] uppercase text-muted-foreground">
-            // LOG
-          </div>
-          <button
-            type="button"
-            onClick={() => setLog([])}
-            className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors"
-          >
-            [ clear ]
-          </button>
-        </div>
+      <SectionCard
+        eyebrow="// LOG"
+        title="Posledných 50 udalostí"
+        padded={false}
+        actions={
+          <Button variant="ghost" size="sm" onClick={() => setLog([])} className="h-8 text-muted-foreground">
+            <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Clear
+          </Button>
+        }
+      >
         <div className="max-h-64 overflow-y-auto p-4 font-mono text-[11px] space-y-1">
           {log.length === 0 ? (
             <div className="text-muted-foreground">[ idle ]</div>
           ) : (
             log.map((l, i) => (
               <div key={i} className="flex gap-3">
-                <span className="text-muted-foreground tracking-[0.1em]">
-                  {l.ts}
-                </span>
-                <span
-                  className={
-                    l.dir === "→"
-                      ? "text-primary"
-                      : l.dir === "←"
-                        ? "text-foreground"
-                        : "text-destructive"
-                  }
-                >
+                <span className="text-muted-foreground tracking-[0.1em]">{l.ts}</span>
+                <span className={l.dir === "→" ? "text-primary" : l.dir === "←" ? "text-success" : "text-danger"}>
                   {l.dir}
                 </span>
                 <span className="text-foreground break-all">{l.text}</span>
@@ -359,7 +276,7 @@ export const McpPanel = () => {
           )}
           <div ref={logEndRef} />
         </div>
-      </div>
+      </SectionCard>
     </div>
   );
 };
