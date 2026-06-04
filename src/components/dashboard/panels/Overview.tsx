@@ -166,7 +166,9 @@ export const Overview = () => {
         </SectionCard>
       </div>
 
-      {/* Recent signups */}
+      {/* Recent activity + signups */}
+      <RecentActivity />
+
       <SectionCard
         eyebrow="// RECENT SIGNUPS"
         title="Posledné registrácie"
