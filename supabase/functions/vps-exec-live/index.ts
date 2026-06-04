@@ -52,6 +52,9 @@ function validateLive(cmd: string): ValidationResult {
   if (trimmed.length > MAX_LEN) return { ok: false, reason: "command too long" };
   if (HARD_FORBIDDEN.test(trimmed))
     return { ok: false, reason: "forbidden shell metacharacter (; & | $ > < ` newline)" };
+  const first = trimmed.split(/\s+/)[0];
+  if (!LIVE_ALLOW.has(first))
+    return { ok: false, reason: `command "${first}" not in allowlist` };
   return { ok: true };
 }
 
