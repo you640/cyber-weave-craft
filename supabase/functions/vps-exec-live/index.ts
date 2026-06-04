@@ -2,9 +2,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { buildCorsHeaders, handlePreflight, withCors } from "../_shared/cors.ts";
 
-// Live shell: NO command allowlist (power-user mode), but still:
+// Live shell: extended (power-user) command allowlist for admins.
 //  - admin-only,
 //  - rejects shell metacharacters enabling chaining / substitution / redirection,
+//  - first token must be in the extended allowlist,
 //  - hard timeout,
 //  - full audit log (command + exit + stdout snippet).
 // Server-side proxy: secrets never reach the browser.
@@ -12,6 +13,35 @@ import { buildCorsHeaders, handlePreflight, withCors } from "../_shared/cors.ts"
 // Block: backtick, newline/CR, ; & | $ > <  and $( … ) command substitution.
 const HARD_FORBIDDEN = /[;&|`$><\n\r]|\$\(/;
 const MAX_LEN = 2000;
+
+// Extended allowlist of base commands (first token only).
+// Intentionally excludes destructive/network-fetch tools: rm, curl, wget, nc,
+// chmod, chown, crontab, dd, mkfs, mount, kill, killall, shutdown, reboot, etc.
+const LIVE_ALLOW = new Set([
+  // read-only inspection
+  "uptime", "whoami", "hostname", "date", "df", "du", "free", "uname",
+  "ls", "ll", "cat", "tac", "tail", "head", "grep", "egrep", "fgrep",
+  "wc", "sort", "uniq", "cut", "awk", "sed", "tr", "find", "stat", "file",
+  "who", "w", "id", "groups", "last", "lastlog",
+  "ps", "top", "htop", "pgrep", "pidof", "lsof",
+  "ss", "netstat", "ip", "ifconfig", "ping", "traceroute", "dig", "nslookup", "host",
+  "env", "printenv", "history", "alias", "type", "which", "whereis",
+  "systemctl", "journalctl", "service",
+  "docker", "docker-compose", "compose", "podman",
+  "ufw", "iptables", "nft",
+  "git", "node", "npm", "pnpm", "bun", "yarn", "deno",
+  "python", "python3", "pip", "pip3",
+  "php", "composer", "wp",
+  "nginx", "apache2", "apachectl",
+  "mysql", "psql", "redis-cli", "mongo",
+  "echo", "true", "false", "yes", "sleep",
+  // nexify wrappers
+  "nexify-health",
+  "nexify-wp-audit-start",
+  "nexify-wp-audit-status",
+  "nexify-list-reports",
+  "nexify-latest-report",
+]);
 
 type ValidationResult = { ok: true } | { ok: false; reason: string };
 
@@ -22,6 +52,9 @@ function validateLive(cmd: string): ValidationResult {
   if (trimmed.length > MAX_LEN) return { ok: false, reason: "command too long" };
   if (HARD_FORBIDDEN.test(trimmed))
     return { ok: false, reason: "forbidden shell metacharacter (; & | $ > < ` newline)" };
+  const first = trimmed.split(/\s+/)[0];
+  if (!LIVE_ALLOW.has(first))
+    return { ok: false, reason: `command "${first}" not in allowlist` };
   return { ok: true };
 }
 

@@ -2,7 +2,12 @@
 
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I to avoid confusion
 
-const randomChar = () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+// ALPHABET.length === 32 (power of 2) → buf[0] % 32 is unbiased.
+const randomChar = (): string => {
+  const buf = new Uint8Array(1);
+  crypto.getRandomValues(buf);
+  return ALPHABET[buf[0] % ALPHABET.length];
+};
 
 /** Format: XXXX-XXXX (8 chars, ~40 bits entropy per code) */
 export const generateRecoveryCode = (): string => {
