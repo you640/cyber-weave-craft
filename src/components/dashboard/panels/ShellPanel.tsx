@@ -216,7 +216,27 @@ export const ShellPanel = () => {
     if (el) el.scrollTop = el.scrollHeight;
   }, [history]);
 
+  const clearOutput = useCallback(() => setHistory([]), []);
+
+  const downloadOutput = useCallback(() => {
+    const txt = history
+      .map((h) => `$ ${h.command}\n${h.stdout}${h.stderr ? `\n[stderr]\n${h.stderr}` : ""}\n# exit ${h.exit_code} · ${h.duration_ms}ms\n`)
+      .join("\n");
+    const blob = new Blob([txt], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `shell-session-${new Date().toISOString().replace(/[:.]/g, "-")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [history]);
+
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.ctrlKey && e.key.toLowerCase() === "l") {
+      e.preventDefault();
+      clearOutput();
+      return;
+    }
     if (e.key === "Enter" && !pending) {
       e.preventDefault();
       const cmd = input;
