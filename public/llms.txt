@@ -1,0 +1,15 @@
+# NEXIFI STUDIO TECH
+
+> Profesionálne služby kybernetickej bezpečnosti pre slovenský a český trh — audity, penetračné testy, reakcia na incidenty, retainerové programy a bezpečnostné poradenstvo.
+
+## Pages
+
+- [/](/): Domovská stránka s prehľadom služieb kybernetickej bezpečnosti a cenníkom.
+- [/o-nas](/o-nas): O spoločnosti NEXIFI STUDIO TECH, náš tím a odbornosť.
+- [/case-studies](/case-studies): Prípadové štúdie a referencie z realizovaných projektov.
+- [/blog](/blog): Blog, novinky a odborné články zo sveta kyberbezpečnosti.
+- [/kontakt](/kontakt): Kontaktné informácie a formulár pre nezáväznú konzultáciu.
+- [/privacy](/privacy): Zásady ochrany osobných údajov.
+- [/dpa](/dpa): Dohoda o spracovaní osobných údajov (DPA).
+- [/terms](/terms): Všeobecné obchodné podmienky.
+- [/cookies](/cookies): Politika používania cookies.
