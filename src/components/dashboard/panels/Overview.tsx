@@ -8,6 +8,7 @@ import { StatCard } from "@/components/dashboard/ui/StatCard";
 import { SectionCard } from "@/components/dashboard/ui/SectionCard";
 import { StatusPill } from "@/components/dashboard/ui/StatusPill";
 import { EmptyState } from "@/components/dashboard/ui/EmptyState";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import {
   Users, ShieldCheck, Activity, Server, Terminal, Plug, HeartPulse, Inbox,
 } from "lucide-react";
@@ -165,7 +166,9 @@ export const Overview = () => {
         </SectionCard>
       </div>
 
-      {/* Recent signups */}
+      {/* Recent activity + signups */}
+      <RecentActivity />
+
       <SectionCard
         eyebrow="// RECENT SIGNUPS"
         title="Posledné registrácie"

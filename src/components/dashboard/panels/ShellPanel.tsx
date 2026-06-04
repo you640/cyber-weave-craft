@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, RefreshCw } from "lucide-react";
+import { ChevronDown, RefreshCw, Trash2, Download } from "lucide-react";
 
 type Status = "probing" | "online" | "not_configured" | "error";
 
@@ -216,7 +216,27 @@ export const ShellPanel = () => {
     if (el) el.scrollTop = el.scrollHeight;
   }, [history]);
 
+  const clearOutput = useCallback(() => setHistory([]), []);
+
+  const downloadOutput = useCallback(() => {
+    const txt = history
+      .map((h) => `$ ${h.command}\n${h.stdout}${h.stderr ? `\n[stderr]\n${h.stderr}` : ""}\n# exit ${h.exit_code} · ${h.duration_ms}ms\n`)
+      .join("\n");
+    const blob = new Blob([txt], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `shell-session-${new Date().toISOString().replace(/[:.]/g, "-")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [history]);
+
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.ctrlKey && e.key.toLowerCase() === "l") {
+      e.preventDefault();
+      clearOutput();
+      return;
+    }
     if (e.key === "Enter" && !pending) {
       e.preventDefault();
       const cmd = input;
@@ -313,10 +333,29 @@ export const ShellPanel = () => {
           <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
             // TERMINAL
           </span>
-          <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
-            tapfast@vps
-          </span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={downloadOutput}
+              disabled={history.length === 0}
+              title="Download session"
+              className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground disabled:opacity-30 flex items-center gap-1"
+            >
+              <Download className="h-3 w-3" /> save
+            </button>
+            <button
+              onClick={clearOutput}
+              disabled={history.length === 0}
+              title="Clear (Ctrl+L)"
+              className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground disabled:opacity-30 flex items-center gap-1"
+            >
+              <Trash2 className="h-3 w-3" /> clear
+            </button>
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+              tapfast@vps
+            </span>
+          </div>
         </div>
+
 
         <ScrollArea className="h-[420px]" ref={scrollRef}>
           <div className="p-4 font-mono text-xs space-y-3">
@@ -354,7 +393,7 @@ export const ShellPanel = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
             disabled={pending}
-            placeholder="uptime"
+            placeholder="uptime · df -h · ps aux · docker ps  (↑/↓ história · Ctrl+L clear)"
             className="font-mono text-xs border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-0 h-8"
             autoFocus
           />

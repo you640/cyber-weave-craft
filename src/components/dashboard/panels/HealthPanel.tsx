@@ -92,11 +92,17 @@ export const HealthPanel = () => {
 
   useEffect(() => {
     const tick = () => {
+      if (document.visibilityState !== "visible") return;
       run("nexify-health").then(() => setLastRefresh(new Date().toLocaleTimeString()));
     };
     tick();
-    const id = setInterval(tick, 10000);
-    return () => clearInterval(id);
+    const id = setInterval(tick, 30000);
+    const onVis = () => { if (document.visibilityState === "visible") tick(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVis);
+    };
   }, [run]);
 
   const metrics = data?.stdout ? parseHealth(data.stdout) : null;
@@ -118,7 +124,7 @@ export const HealthPanel = () => {
       <PageHeader
         eyebrow="// HEALTH · 12"
         title="Vitalita systému"
-        description="194.182.87.6 · auto-refresh 10s · cmd: nexify-health"
+        description="194.182.87.6 · auto-refresh 30s (pauza pri skrytí tabu) · cmd: nexify-health"
         actions={
           <>
             <StatusPill tone={tone} label={toneLabel} />
