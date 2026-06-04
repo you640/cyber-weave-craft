@@ -55,6 +55,7 @@ const Dashboard = () => {
 
   return (
     <SidebarProvider>
+      <CommandPalette />
       <div className="min-h-screen flex w-full bg-[hsl(var(--surface-muted))]">
         <AdminSidebar />
 
@@ -75,16 +76,21 @@ const Dashboard = () => {
             <div className="h-5 w-px bg-[hsl(var(--border-subtle))] mx-1 hidden md:block" />
             <Breadcrumb />
             <div className="ml-auto flex items-center gap-2">
-              <div className="hidden md:flex items-center gap-2 h-8 px-3 rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-muted))] text-xs text-muted-foreground min-w-[220px]">
+              <button
+                type="button"
+                onClick={() => (window as Window & { __openCmdK?: () => void }).__openCmdK?.()}
+                className="hidden md:flex items-center gap-2 h-8 px-3 rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-muted))] text-xs text-muted-foreground min-w-[220px] hover:border-[hsl(var(--border-strong))] hover:text-foreground transition-colors"
+              >
                 <Search className="h-3.5 w-3.5" />
-                <span className="flex-1 truncate">Hľadať…</span>
+                <span className="flex-1 truncate text-left">Hľadať…</span>
                 <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-surface border border-[hsl(var(--border-subtle))]">
                   ⌘K
                 </kbd>
-              </div>
+              </button>
               <UserMenu />
             </div>
           </header>
+
 
           <main className="flex-1 px-4 md:px-8 py-8 max-w-7xl w-full mx-auto">
             <div key={pathname} className="animate-panel-in">
