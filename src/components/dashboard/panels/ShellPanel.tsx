@@ -393,7 +393,7 @@ export const ShellPanel = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
             disabled={pending}
-            placeholder="uptime"
+            placeholder="uptime · df -h · ps aux · docker ps  (↑/↓ história · Ctrl+L clear)"
             className="font-mono text-xs border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-0 h-8"
             autoFocus
           />
