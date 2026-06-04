@@ -124,7 +124,7 @@ export const HealthPanel = () => {
       <PageHeader
         eyebrow="// HEALTH · 12"
         title="Vitalita systému"
-        description="194.182.87.6 · auto-refresh 10s · cmd: nexify-health"
+        description="194.182.87.6 · auto-refresh 30s (pauza pri skrytí tabu) · cmd: nexify-health"
         actions={
           <>
             <StatusPill tone={tone} label={toneLabel} />
