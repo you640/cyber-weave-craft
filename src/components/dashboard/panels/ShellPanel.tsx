@@ -333,10 +333,29 @@ export const ShellPanel = () => {
           <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
             // TERMINAL
           </span>
-          <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
-            tapfast@vps
-          </span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={downloadOutput}
+              disabled={history.length === 0}
+              title="Download session"
+              className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground disabled:opacity-30 flex items-center gap-1"
+            >
+              <Download className="h-3 w-3" /> save
+            </button>
+            <button
+              onClick={clearOutput}
+              disabled={history.length === 0}
+              title="Clear (Ctrl+L)"
+              className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground disabled:opacity-30 flex items-center gap-1"
+            >
+              <Trash2 className="h-3 w-3" /> clear
+            </button>
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+              tapfast@vps
+            </span>
+          </div>
         </div>
+
 
         <ScrollArea className="h-[420px]" ref={scrollRef}>
           <div className="p-4 font-mono text-xs space-y-3">
