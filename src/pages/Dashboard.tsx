@@ -12,6 +12,7 @@ import { ReportsPanel } from "@/components/dashboard/panels/ReportsPanel";
 import { DiagnosticsPanel } from "@/components/dashboard/panels/DiagnosticsPanel";
 import { MfaPanel } from "@/components/dashboard/panels/MfaPanel";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { CommandPalette } from "@/components/dashboard/CommandPalette";
 import nexifyLogo from "@/assets/nexify-logo.png";
 import { Search, ChevronRight } from "lucide-react";
 
